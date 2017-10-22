@@ -1,5 +1,5 @@
 (ns magic-square.puzzle
-  (:require [flames.core :as flames], [clojure.math.combinatorics :as combo]))
+  (:require [clojure.math.combinatorics :as combo]))
 
 (def values [1.0 1.5 2.0 2.5 3.0 3.5 4.0 4.5 5.0])
 
@@ -20,8 +20,8 @@
         rl ; diagnol positions, top right -> bottom left
           (loop [acc [[0, (dec (count m))]]]
             (if
-              (= (count lr) (count acc)
-                acc)
+              (= (count lr) (count acc))
+                acc
               ;else
               (let [[x, y] (last acc)]
                 (recur (conj acc [(inc x) (dec y)])))))]
