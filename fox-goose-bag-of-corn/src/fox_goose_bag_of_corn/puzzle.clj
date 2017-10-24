@@ -1,6 +1,8 @@
 (ns fox-goose-bag-of-corn.puzzle
   (:require [clojure.set]))
 
+(def index {:left-bank 0, :boat 1, :boat-from-left 1, :boat-from-right 1, :right-bank 2})
+
 (def start-pos [[[:fox :goose :corn :you] [:boat] []]])
 
 (defn vecs->sets [positions]
@@ -42,39 +44,81 @@
           :boat-from-right)))))
 
 
-(defn carry-right [fgbc-state carry-item]
+(defn carry-left-to-boat [fgbc-state, carry-item]
   (vec
     (mapv
       (fn [place, place-index]
         (cond
-          (= place-index 0)
-          (clojure.set/difference (set place) #{:you carry-item})
-          (= place-index 1)
-          (clojure.set/union (set place) #{:you carry-item})
-          (= place-index 2)
+          (= place-index (index :left-bank))                           ; if we're at the left bank
+          (clojure.set/difference place #{:you carry-item})            ;   leave the bank with you and the item
+          (= place-index (index :boat))                                ; if we're at the boat
+          (clojure.set/union place #{:you carry-item})                 ;   get on the boat with the item
+          (= place-index (index :right-bank))                          ; else, right bank stays the same
           place))
       fgbc-state
       (range (count fgbc-state)))))
 
-(defmulti every-possible-next-state find-where-are-you?)
+(defn carry-boat-to-right [fgbc-state, carry-item]
+  (vec
+    (mapv
+      (fn [place, place-index]
+        (cond
+          (= place-index (index :left-bank))                           ; left bank stays the same
+          place
+          (= place-index (index :boat))                                ; if we're at the boat
+          (clojure.set/difference place #{:you carry-item})            ;   get off the boat with the item
+          (= place-index (index :right-bank))                          ; if we're on the right bank
+          (clojure.set/union place #{:you carry-item})))               ;   get on the right bank with the item
+      fgbc-state
+      (range (count fgbc-state)))))
 
-(defmethod every-possible-next-state :left-bank
-  [prev-states]
-  (let [most-recent (last prev-states)]
+(defn carry-boat-to-left [fgbc-state, carry-item]
+  (vec
+    (mapv
+      (fn [place, place-index]
+        (cond
+          (= place-index (index :left-bank))
+          (clojure.set/union place #{:you carry-item})
+          (= place-index (index :boat))
+          (clojure.set/difference place #{:you carry-item})
+          (= place-index (index :right-bank))
+          place))
+      fgbc-state
+      (range (count fgbc-state)))))
+
+(defn carry-right-to-boat [fgbc-state, carry-item]
+  (vec
+    (mapv
+      (fn [place, place-index]
+        (cond
+          (= place-index (index :left-bank))
+          place
+          (= place-index (index :boat))
+          (clojure.set/union place #{:you carry-item})
+          (= place-index (index :right-bank))
+          (clojure.set/difference place #{:you carry-item})))
+      fgbc-state
+      (range (count fgbc-state)))))
+
+(defn carry-item-from [where]
+  (cond
+    (= where :left-bank)
+    carry-left-to-boat
+    (= where :boat-from-left)
+    carry-boat-to-right
+    (= where :boat-from-right)
+    carry-boat-to-left
+    (= where :right-bank)
+    carry-right-to-boat))
+
+(defn every-possible-next-state [prev-states]
+  (let [coming-from (find-where-are-you? prev-states),
+        most-recent (last prev-states)
+        carry-fn (carry-item-from coming-from)]
     (mapv
       (fn [carry-item]
-        (carry-right most-recent, carry-item))
-      (clojure.set/difference (first most-recent) #{:you}))))
-
-
-
-
-    ;(mapv
-    ;  (fn [carry-item]
-    ;    [
-    ;     (clojure.set/difference most-recent))))
-
-
+        (carry-fn most-recent, carry-item))
+      (clojure.set/difference (nth most-recent (index coming-from)) #{:you :boat}))))
 
 
 (defn river-crossing-plan []
@@ -99,11 +143,32 @@
 
 
 
+
+
+(defn test-coming-from-left []
+  (let [test-data
+        [[[:fox :goose :corn :you] [:boat] []]]]
+    (doseq [p
+            (sets->vecs
+              (every-possible-next-state (vecs->sets test-data)))]
+      (println p))))
+
+(defn test-coming-from-right []
+  (let [test-data
+        [[[:fox :goose] [:boat] [:corn :you]]]]
+    (doseq [p
+            (sets->vecs
+              (every-possible-next-state (vecs->sets test-data)))]
+      (println p))))
+
+(defn test-coming-from-boat []
+  (let [test-data
+        [[[:fox :goose] [:boat] [:corn :you]],
+         [[:fox :goose] [:you :boat :corn] []]]]
+    (doseq [p
+            (sets->vecs
+              (every-possible-next-state (vecs->sets test-data)))]
+      (println p))))
+
 (defn -main [& args]
-  (doseq [p
-          (sets->vecs
-            (every-possible-next-state (vecs->sets start-pos)))]
-    (println p)))
-
-
-
+  (test-coming-from-left))
