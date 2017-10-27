@@ -1,14 +1,17 @@
 (ns fox-goose-bag-of-corn.puzzle
-  (:require [clojure.set]))
+  (:require [clojure.set])
+  (:import (fox_goose_bag_of_corn.java TreeNode)))
 
 (def index {:left-bank 0, :boat 1, :boat-from-left 1, :boat-from-right 1, :right-bank 2})
 
 (def start-pos [[[:fox :goose :corn :you] [:boat] []]])
 
 (defn vecs->sets [positions]
+  "A vec of vecs of vecs -> a vec of vecs of sets"
   (mapv #(mapv set %) positions))
 
 (defn sets->vecs [positions]
+  "A vec of vecs of sets -> a vec of vecs of vecs"
   (mapv #(mapv vec %) positions))
 
 (defn everyones-safe? [fgbc-state]
@@ -111,29 +114,87 @@
     (= where :right-bank)
     carry-right-to-boat))
 
+(defn scrub-nils [sets]
+  (mapv
+    #(clojure.set/difference % #{nil})
+    sets))
+
 (defn every-possible-next-state [prev-states]
   (let [coming-from (find-where-are-you? prev-states),
         most-recent (last prev-states)
         carry-fn (carry-item-from coming-from)]
     (mapv
       (fn [carry-item]
-        (carry-fn most-recent, carry-item))
-      (clojure.set/difference (nth most-recent (index coming-from)) #{:you :boat}))))
+        (scrub-nils
+          (carry-fn most-recent, carry-item)))
+      (conj
+        (clojure.set/difference (nth most-recent (index coming-from)) #{:you :boat})
+        nil))))
+
+(defn every-possible-valid-next-state [prev-states]
+  (->>
+    (every-possible-next-state prev-states)
+    (filter everyones-safe?)))
+
 
 (defn tree-with-root [r]
-  {:node r, :nodes []})
+  (new TreeNode r))
+
+(defn get-lowest-branches [^TreeNode tree]
+  (.getLowestBranches tree))
+
+;(defn get-lowest-branch-vals [^TreeNode tree]
+;  (map
+;    #(.rootVal %)
+;    (get-lowest-branches tree)))
+
+(defn add-branches [^TreeNode tree, new-branch-vals]
+  (.addBranches tree new-branch-vals))
+
+(defn branch->prev-states [^TreeNode branch]
+  (vec
+    (.toAncestorList branch)))
+
+
+
+(defn build-up-tree [tree]
+  (let [lowest-branches (get-lowest-branches tree)]
+    (do
+      (doseq [branch lowest-branches]
+        (add-branches
+          branch
+          (every-possible-valid-next-state
+            (branch->prev-states branch))))
+      tree)))
+
+
+(defn found-result [tree]
+  (->>
+    (get-lowest-branches tree)
+    (filter
+      (fn [^TreeNode node]
+        (= (.rootVal node) #{:fox :goose :corn :you})))
+    (map
+      (fn [^TreeNode golden-node]
+        (branch->prev-states golden-node)))
+    first))
+
 
 (defn river-crossing-plan* [sp]
   (loop [tree (tree-with-root (first sp))]
-    (if (gotten-to-final-step? (bottom-branches tree))
-      (parse-out-solution tree)
-      ;else
-      (recur (add-new-branches every-possible-next-state)))))
+    (let [extended-tree (build-up-tree tree)]
+      (do
+        (println (.toPrettyString extended-tree))
+        (or
+          (found-result extended-tree)
+          (recur extended-tree))))))
 
+
+;(defn river-crossing-plan []
+;  start-pos)
 
 (defn river-crossing-plan []
-  start-pos)
-
+  (river-crossing-plan* (vecs->sets start-pos)))
 
 ; [[:fox :goose :corn :you] [:boat] []] ; take the goose first
 ; [[:fox :corn] [:boat :you :goose] []]
@@ -154,31 +215,31 @@
 
 
 
-
-(defn test-coming-from-left []
-  (let [test-data
-        [[[:fox :goose :corn :you] [:boat] []]]]
-    (doseq [p
-            (sets->vecs
-              (every-possible-next-state (vecs->sets test-data)))]
-      (println p))))
-
-(defn test-coming-from-right []
-  (let [test-data
-        [[[:fox :goose] [:boat] [:corn :you]]]]
-    (doseq [p
-            (sets->vecs
-              (every-possible-next-state (vecs->sets test-data)))]
-      (println p))))
-
-(defn test-coming-from-boat []
-  (let [test-data
-        [[[:fox :goose] [:boat] [:corn :you]],
-         [[:fox :goose] [:you :boat :corn] []]]]
-    (doseq [p
-            (sets->vecs
-              (every-possible-next-state (vecs->sets test-data)))]
-      (println p))))
+;
+;(defn test-coming-from-left []
+;  (let [test-data
+;        [[[:fox :goose :corn :you] [:boat] []]]]
+;    (doseq [p
+;            (sets->vecs
+;              (every-possible-next-state (vecs->sets test-data)))]
+;      (println p))))
+;
+;(defn test-coming-from-right []
+;  (let [test-data
+;        [[[:fox :goose] [:boat] [:corn :you]]]]
+;    (doseq [p
+;            (sets->vecs
+;              (every-possible-next-state (vecs->sets test-data)))]
+;      (println p))))
+;
+;(defn test-coming-from-boat []
+;  (let [test-data
+;        [[[:fox :goose] [:boat] [:corn :you]],
+;         [[:fox :goose] [:you :boat :corn] []]]]
+;    (doseq [p
+;            (sets->vecs
+;              (every-possible-next-state (vecs->sets test-data)))]
+;      (println p))))
 
 (defn -main [& args]
-  (test-coming-from-left))
+  (river-crossing-plan))
