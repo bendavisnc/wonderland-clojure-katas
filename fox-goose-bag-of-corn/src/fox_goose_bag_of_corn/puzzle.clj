@@ -120,6 +120,16 @@
         (carry-fn most-recent, carry-item))
       (clojure.set/difference (nth most-recent (index coming-from)) #{:you :boat}))))
 
+(defn tree-with-root [r]
+  {:node r, :nodes []})
+
+(defn river-crossing-plan* [sp]
+  (loop [tree (tree-with-root (first sp))]
+    (if (gotten-to-final-step? (bottom-branches tree))
+      (parse-out-solution tree)
+      ;else
+      (recur (add-new-branches every-possible-next-state)))))
+
 
 (defn river-crossing-plan []
   start-pos)
