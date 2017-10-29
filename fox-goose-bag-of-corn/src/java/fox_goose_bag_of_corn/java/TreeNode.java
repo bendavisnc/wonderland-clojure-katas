@@ -6,20 +6,20 @@ import java.util.List;
 public class TreeNode<T> {
 
 	public T rootVal;
-	public List<TreeNode<T>> branches;
-	public TreeNode<T> rootParent;
+	private List<TreeNode<T>> branches;
+	private TreeNode<T> rootParent;
 
 	public TreeNode(T v) {
 		rootVal = v;
 		branches = new ArrayList<>();
 	}
 
-	public TreeNode(TreeNode<T> p, T v) {
+	private TreeNode(TreeNode<T> p, T v) {
 		this(v);
 		rootParent = p;
 	}
 
-	boolean hasBranches() {
+	private boolean hasBranches() {
 		return !branches.isEmpty();
 	}
 
@@ -46,13 +46,12 @@ public class TreeNode<T> {
 		}
 	}
 
-	public List<T> toAncestorList() {
+	public List<T> nodeToValsList() {
 		List<T> acc = new ArrayList<>();
-		acc.add(rootVal);
-		TreeNode<T> parentNode = rootParent;
-		while (parentNode != null) {
-			acc.add(0, parentNode.rootVal);
-			parentNode = parentNode.rootParent;
+		TreeNode<T> node = this;
+		while (node != null) {
+			acc.add(0, node.rootVal);
+			node = node.rootParent;
 		}
 		return acc;
 	}
