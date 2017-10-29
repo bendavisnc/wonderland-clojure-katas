@@ -39,16 +39,16 @@
 (defn find-where-are-you? [prev-steps]
   (let [most-recent (last prev-steps)]
     (cond
-      (clojure.set/subset? #{:you} (first most-recent))
+      (:you (first most-recent))
       :left-bank
-      (clojure.set/subset? #{:you} (last most-recent))
+      (:you (last most-recent))
       :right-bank
       :else ; must be in the boat
       (let [second-most-recent (last (pop prev-steps))]
         (cond
-          (clojure.set/subset? #{:you} (first second-most-recent))
+          (:you (first second-most-recent))
           :boat-from-left
-          (clojure.set/subset? #{:you} (last second-most-recent))
+          (:you (last second-most-recent))
           :boat-from-right)))))
 
 
@@ -89,16 +89,6 @@
 
 (defn add-branches [^TreeNode tree, new-branch-vals]
   (.addBranches tree new-branch-vals))
-
-;(defn branch->prev-steps [^TreeNode branch]
-;  (vec
-;    (loop [acc nil, node branch]
-;      (if (.isTreeRoot node)
-;        (cons (.rootVal node) acc)
-;        ;else
-;        (recur
-;          (cons (.rootVal node) acc)
-;          (.rootParent node))))))
 
 (defn branch->prev-steps [^TreeNode branch]
   (vec
