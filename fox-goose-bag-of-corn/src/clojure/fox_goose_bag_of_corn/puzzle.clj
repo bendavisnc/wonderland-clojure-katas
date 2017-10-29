@@ -4,6 +4,8 @@
 
 (def start-pos [[[:fox :goose :corn :you] [:boat] []]])
 
+(def index {:left-bank 0, :boat 1, :right-bank 2})
+
 (defn vecs->sets [positions]
   "A vec of vecs of vecs -> a vec of vecs of sets"
   (mapv #(mapv set %) positions))
@@ -16,18 +18,16 @@
   (->>
     fgbc-step
     (filter                  ; only look at what doesn't have "you"
-      (fn [g]
-        (not (clojure.set/subset? #{:you} g))))
+      #(not (:you %)))
     (filter                  ; ... and does contain an unfaithful pair
-      (fn [g-wo-you]
-        (or
-          (clojure.set/subset?
-            #{:fox :goose}
-            g-wo-you)
-          (clojure.set/subset?
-            #{:goose :corn}
-            g-wo-you))))
-    empty?))                 ; not empty = someone's not safe
+      #(or
+        (clojure.set/subset?
+          #{:fox :goose}
+          %)
+        (clojure.set/subset?
+          #{:goose :corn}
+          %)))
+    empty?))                ; not empty = someone's not safe
 
 (defn boat-capacity-respected? [fgbc-step]
   (->
@@ -52,116 +52,34 @@
           :boat-from-right)))))
 
 
-
-(defn every-possible-next-from-left-bank [fgbc-step]
-  (let [[orig-left, orig-boat, orig-right] fgbc-step]
+(defn every-possible-next-from-* [from, to]
+  (fn [fgbc-step]
     (let [
           items-to-carry
-          (clojure.set/difference orig-left #{:you})
-          every-possible-carry
+          (clojure.set/difference (fgbc-step (index from)) #{:you :boat})
+          every-possible-step
           (mapv
             (fn [carry-item]
-              [
-               (clojure.set/difference orig-left #{:you carry-item})
-               (clojure.set/union orig-boat #{:you carry-item})
-               orig-right])
-            items-to-carry)
-          no-carry
-          [
-           (clojure.set/difference orig-left #{:you})
-           (clojure.set/union orig-boat #{:you})
-           orig-right]]
+              (->
+                fgbc-step
+                (update (index from) #(clojure.set/difference % #{:you carry-item}))
+                (update (index to) #(clojure.set/union % (if carry-item #{:you carry-item} #{:you})))))
+            (conj items-to-carry nil))]
       (->>
-        (conj every-possible-carry no-carry)
+        every-possible-step
         (filter boat-capacity-respected?)
         (filter everyones-safe?)))))
 
-
-(defn every-possible-next-from-boat-to-right-bank [fgbc-step]
-  (let [[orig-left, orig-boat, orig-right] fgbc-step]
-    (let [
-          items-to-carry
-          (clojure.set/difference orig-boat #{:you :boat})
-          every-possible-carry
-          (mapv
-            (fn [carry-item]
-              [
-               orig-left
-               (clojure.set/difference orig-boat #{:you carry-item})
-               (clojure.set/union orig-right #{:you carry-item})])
-            items-to-carry)
-          no-carry
-          [
-           orig-left
-           (clojure.set/difference orig-boat #{:you})
-           (clojure.set/union orig-right #{:you})]]
-      (->>
-        (conj every-possible-carry no-carry)
-        (filter boat-capacity-respected?)
-        (filter everyones-safe?)))))
-
-(defn every-possible-next-from-right-bank [fgbc-step]
-  (let [[orig-left, orig-boat, orig-right] fgbc-step]
-    (let [
-          items-to-carry
-          (clojure.set/difference orig-right #{:you})
-          every-possible-carry
-          (mapv
-            (fn [carry-item]
-              [
-               orig-left
-               (clojure.set/union orig-boat #{:you carry-item})
-               (clojure.set/difference orig-right #{:you carry-item})])
-            items-to-carry)
-          no-carry
-          [
-           orig-left
-           (clojure.set/union orig-boat #{:you})
-           (clojure.set/difference orig-right #{:you})]]
-      (->>
-        (conj every-possible-carry no-carry)
-        (filter boat-capacity-respected?)
-        (filter everyones-safe?)))))
-
-(defn every-possible-next-from-boat-to-left-bank [fgbc-step]
-  (let [[orig-left, orig-boat, orig-right] fgbc-step]
-    (let [
-          items-to-carry
-          (clojure.set/difference orig-boat #{:you :boat})
-          every-possible-carry
-          (mapv
-            (fn [carry-item]
-              [
-               (clojure.set/union orig-left #{:you carry-item})
-               (clojure.set/difference orig-boat #{:you carry-item})
-               orig-right])
-            items-to-carry)
-          no-carry
-          [
-           (clojure.set/union orig-left #{:you})
-           (clojure.set/difference orig-boat #{:you})
-           orig-right]]
-      (->>
-        (conj every-possible-carry no-carry)
-        (filter boat-capacity-respected?)
-        (filter everyones-safe?)))))
-
-(defn every-possible-next-from [where]
-  (
-    {
-     :left-bank every-possible-next-from-left-bank
-     :boat-from-left every-possible-next-from-boat-to-right-bank
-     :right-bank every-possible-next-from-right-bank
-     :boat-from-right every-possible-next-from-boat-to-left-bank}
-    where))
-
+(def every-possible-next-from
+  {:left-bank (every-possible-next-from-* :left-bank :boat)
+   :boat-from-left (every-possible-next-from-* :boat :right-bank)
+   :right-bank (every-possible-next-from-* :right-bank :boat)
+   :boat-from-right (every-possible-next-from-* :boat :left-bank)})
 
 (defn every-possible-next-step [prev-steps]
   (let [coming-from (find-where-are-you? prev-steps),
-        most-recent (last prev-steps)
-        applicable-fn (every-possible-next-from coming-from)]
-    (applicable-fn most-recent)))
-
+        most-recent (last prev-steps)]
+    ((every-possible-next-from coming-from) most-recent)))
 
 (defn tree-with-root [r]
   (new TreeNode r))
@@ -172,52 +90,52 @@
 (defn add-branches [^TreeNode tree, new-branch-vals]
   (.addBranches tree new-branch-vals))
 
+;(defn branch->prev-steps [^TreeNode branch]
+;  (vec
+;    (loop [acc nil, node branch]
+;      (if (.isTreeRoot node)
+;        (cons (.rootVal node) acc)
+;        ;else
+;        (recur
+;          (cons (.rootVal node) acc)
+;          (.rootParent node))))))
+
 (defn branch->prev-steps [^TreeNode branch]
   (vec
     (.nodeToValsList branch)))
 
-
-
 (defn build-up-tree [tree]
-  (let [lowest-branches (get-lowest-branches tree)]
-    (do
-      (doseq [branch lowest-branches]
-        (add-branches
-          branch
-          (every-possible-next-step
-            (branch->prev-steps branch))))
-      tree)))
-
+  (doseq [branch (get-lowest-branches tree)]
+    (add-branches
+      branch
+      (every-possible-next-step
+        (branch->prev-steps branch)))))
 
 (defn found-result [tree]
   (->>
     (get-lowest-branches tree)
     (filter
-      (fn [^TreeNode node]
-        (= (nth (.rootVal node) 2) #{:fox :goose :corn :you})))
+      #(= ((.rootVal %) (index :right-bank)) #{:fox :goose :corn :you}))
     (map
-      (fn [^TreeNode golden-node]
-        (branch->prev-steps golden-node)))
+      #(branch->prev-steps %))
     first))
-;
-;
-(defn river-crossing-plan* [sp]
-  (loop [tree (tree-with-root (first sp))]
-    (let [extended-tree (build-up-tree tree)]
-      (do
-        ;(println (.toPrettyString extended-tree))
-        (or
-          (found-result extended-tree)
-          (recur extended-tree))))))
 
+
+(defn river-crossing-plan* [sp]
+  (let [tree (tree-with-root (first sp))]
+    (loop []
+      (do
+        (build-up-tree tree)
+        (or
+          (found-result tree)
+          (recur))))))
 
 ;(defn river-crossing-plan []
 ;  start-pos)
-;
 (defn river-crossing-plan []
   (sets->vecs
-    (river-crossing-plan* (vecs->sets start-pos))))
-
+    (river-crossing-plan*
+      (vecs->sets start-pos))))
 
 (defn -main [& args]
   (time
