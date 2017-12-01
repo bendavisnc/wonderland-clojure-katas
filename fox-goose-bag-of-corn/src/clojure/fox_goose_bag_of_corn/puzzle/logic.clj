@@ -1,4 +1,9 @@
-(ns fox-goose-bag-of-corn.puzzle.logic)
+(ns fox-goose-bag-of-corn.puzzle.logic
+  (:require [clojure.spec.alpha :as spec]
+            [clojure.spec.test.alpha :as spec-test]
+            [clojure.spec.alpha :as spec]
+            [fox-goose-bag-of-corn.puzzle.specs :as common-specs]))
+
 
 (defn find-where-are-you? [prev-steps]
   (let [most-recent (last prev-steps)]
@@ -15,6 +20,12 @@
           (:you (last second-most-recent))
           :boat-from-right)))))
 
+
+(spec/fdef find-where-are-you?
+           :args (spec/cat :prev-steps (spec/coll-of common-specs/step-instance-set))
+           :ret #{:left-bank, :right-bank, :boat-from-left, :boat-from-right})
+
+
 (defn everyones-safe? [fgbc-step]
   (->>
     fgbc-step
@@ -30,9 +41,21 @@
            %)))
     empty?))                ; not empty = someone's not safe
 
+(spec/fdef everyones-safe?
+           :args (spec/cat :fgbc-step common-specs/step-instance-set))
+
 (defn boat-capacity-respected? [fgbc-step]
   (->
     fgbc-step
     second
     count
     (<= 3)))
+
+(spec/fdef boat-capacity-respected?
+           :args (spec/cat :fgbc-step common-specs/step-instance-set))
+
+
+
+(spec-test/instrument `find-where-are-you?)
+(spec-test/instrument `everyones-safe?)
+(spec-test/instrument `boat-capacity-respected?)

@@ -1,18 +1,40 @@
 (ns fox-goose-bag-of-corn.puzzle-two
   (:require [clojure.set]
             [clojure.pprint]
-            [fox-goose-bag-of-corn.puzzle.java-solution :as chosen-solution]))
+            [clojure.spec.alpha :as spec]
+            [clojure.spec.test.alpha :as spec-test]
+            [fox-goose-bag-of-corn.puzzle.approach.java-solution :as chosen-solution]
+            [fox-goose-bag-of-corn.puzzle.specs :as common-specs]))
+            ;[fox-goose-bag-of-corn.puzzle.go-solution :as chosen-solution]))
 
 (def start-pos [[[:fox :goose :corn :you] [:boat] []]])
+
+;(s/fdef adder
+;        :args (s/cat :x number?)
+;        :ret (s/fspec :args (s/cat :y number?)
+;                      :ret number?)
+;        :fn #(= (-> % :args :x) ((:ret %) 0)))
+
+
+; Info about where everyone is for one step - keywords grouped by vectors
+; eg, "[[:fox], [:goose],  [...everyone-else]]"
+
 
 (defn vecs->sets [positions]
   "A vec of vecs of vecs -> a vec of vecs of sets"
   (mapv #(mapv set %) positions))
 
+(spec/fdef vecs->sets
+           :args (spec/cat :positions (spec/coll-of common-specs/step-instance-vec))
+           :ret (spec/coll-of common-specs/step-instance-set))
+
 (defn sets->vecs [positions]
   "A vec of vecs of sets -> a vec of vecs of vecs"
   (mapv #(mapv vec %) positions))
 
+(spec/fdef sets->vecs
+           :args (spec/cat :positions (spec/coll-of common-specs/step-instance-set))
+           :ret (spec/coll-of common-specs/step-instance-vec))
 
 ;(defn river-crossing-plan []
 ;  start-pos)
@@ -20,6 +42,10 @@
   (sets->vecs
     (chosen-solution/river-crossing-plan
       (vecs->sets start-pos))))
+
+
+(spec-test/instrument `sets->vecs)
+(spec-test/instrument `vecs->sets)
 
 (defn -main [& args]
   (time
