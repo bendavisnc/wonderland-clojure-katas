@@ -1,6 +1,9 @@
 (ns fox-goose-bag-of-corn.puzzle.step-generation
   (:require [fox-goose-bag-of-corn.puzzle.logic :as logically]
-            [fox-goose-bag-of-corn.puzzle.utilities :refer :all]))
+            [fox-goose-bag-of-corn.puzzle.utilities :refer :all]
+            [clojure.spec.alpha :as spec]
+            [fox-goose-bag-of-corn.puzzle.specs :as common-specs]
+            [clojure.spec.test.alpha :as spec-test]))
 
 (defn every-possible-next-from-* [from, to]
   (fn [fgbc-step]
@@ -30,3 +33,9 @@
   (let [coming-from (logically/find-where-are-you? prev-steps),
         most-recent (last prev-steps)]
     ((every-possible-next-from coming-from) most-recent)))
+
+(spec/fdef every-possible-next-step
+           :args (spec/cat :prev-steps (spec/coll-of common-specs/step-instance-set))
+           :ret (spec/coll-of common-specs/step-instance-set))
+
+(spec-test/instrument `every-possible-next-step)

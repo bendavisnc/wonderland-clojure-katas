@@ -3,9 +3,11 @@
             [clojure.pprint]
             [clojure.spec.alpha :as spec]
             [clojure.spec.test.alpha :as spec-test]
-            [fox-goose-bag-of-corn.puzzle.approach.java-solution :as chosen-solution]
+            [fox-goose-bag-of-corn.puzzle.approach.go-solution :as chosen-solution]
             [fox-goose-bag-of-corn.puzzle.specs :as common-specs]))
             ;[fox-goose-bag-of-corn.puzzle.go-solution :as chosen-solution]))
+
+;[fox-goose-bag-of-corn.puzzle.approach.java-solution :as chosen-solution]
 
 (def start-pos [[[:fox :goose :corn :you] [:boat] []]])
 

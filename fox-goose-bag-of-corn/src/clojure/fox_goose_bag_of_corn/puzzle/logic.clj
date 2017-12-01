@@ -2,6 +2,7 @@
   (:require [clojure.spec.alpha :as spec]
             [clojure.spec.test.alpha :as spec-test]
             [clojure.spec.alpha :as spec]
+            [fox-goose-bag-of-corn.puzzle.utilities :refer :all]
             [fox-goose-bag-of-corn.puzzle.specs :as common-specs]))
 
 
@@ -53,6 +54,12 @@
 
 (spec/fdef boat-capacity-respected?
            :args (spec/cat :fgbc-step common-specs/step-instance-set))
+
+(defn result-found? [fgbc-step]
+;#(= ((.rootVal %) (index :right-bank))
+  (-> fgbc-step
+    (get (index :right-bank))
+    (= #{:fox :goose :corn :you})))
 
 
 

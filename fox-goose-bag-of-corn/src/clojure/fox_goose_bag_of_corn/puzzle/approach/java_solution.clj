@@ -33,7 +33,8 @@
   (->>
     (get-lowest-branches tree)
     (filter
-      #(= ((.rootVal %) (index :right-bank)) #{:fox :goose :corn :you}))
+      #(logically/result-found? (.rootVal %)))
+      ;#(= ((.rootVal %) (index :right-bank)) #{:fox :goose :corn :you}))
     (map
       #(branch->prev-steps %))
     first))
