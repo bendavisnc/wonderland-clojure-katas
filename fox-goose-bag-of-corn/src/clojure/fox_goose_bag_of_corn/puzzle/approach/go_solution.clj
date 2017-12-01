@@ -19,12 +19,10 @@
       (do
         (doseq [next all-possible-nexts]
           (let [farthest-so-far (conj path-steps next)]
-            (do
-              ;(println farthest-so-far)
-              (if (logically/result-found? next)
-                (deliver p farthest-so-far)
-                ;else
-                (async/>! new-node-chan farthest-so-far)))))
+            (if (logically/result-found? next)
+              (deliver p farthest-so-far)
+              ;else
+              (async/>! new-node-chan farthest-so-far))))
         (recur)))))
 
 (spec/fdef add-new-node!! :args (spec/cat :n (spec/coll-of common-specs/step-instance-set)))

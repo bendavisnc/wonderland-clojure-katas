@@ -1,131 +1,41 @@
 (ns fox-goose-bag-of-corn.puzzle
-  (:require [clojure.set] [clojure.pprint])
-  (:import (fox_goose_bag_of_corn.java TreeNode)))
+  (:require [clojure.set]
+            [clojure.pprint]
+            [clojure.spec.alpha :as spec]
+            [clojure.spec.test.alpha :as spec-test]
+            [fox-goose-bag-of-corn.puzzle.approach.java-solution :as chosen-solution]
+            [fox-goose-bag-of-corn.puzzle.specs :as common-specs]))
 
 (def start-pos [[[:fox :goose :corn :you] [:boat] []]])
 
-(def index {:left-bank 0, :boat 1, :right-bank 2})
+;[fox-goose-bag-of-corn.puzzle.approach.go-solution :as chosen-solution]
 
 (defn vecs->sets [positions]
   "A vec of vecs of vecs -> a vec of vecs of sets"
   (mapv #(mapv set %) positions))
 
+(spec/fdef vecs->sets
+           :args (spec/cat :positions (spec/coll-of common-specs/step-instance-vec))
+           :ret (spec/coll-of common-specs/step-instance-set))
+
 (defn sets->vecs [positions]
   "A vec of vecs of sets -> a vec of vecs of vecs"
   (mapv #(mapv vec %) positions))
 
-(defn everyones-safe? [fgbc-step]
-  (->>
-    fgbc-step
-    (filter                  ; only look at what doesn't have "you"
-      #(not (:you %)))
-    (filter                  ; ... and does contain an unfaithful pair
-      #(or
-        (clojure.set/subset?
-          #{:fox :goose}
-          %)
-        (clojure.set/subset?
-          #{:goose :corn}
-          %)))
-    empty?))                ; not empty = someone's not safe
-
-(defn boat-capacity-respected? [fgbc-step]
-  (->
-    fgbc-step
-    second
-    count
-    (<= 3)))
-
-(defn find-where-are-you? [prev-steps]
-  (let [most-recent (last prev-steps)]
-    (cond
-      (:you (first most-recent))
-      :left-bank
-      (:you (last most-recent))
-      :right-bank
-      :else ; must be in the boat
-      (let [second-most-recent (last (pop prev-steps))]
-        (cond
-          (:you (first second-most-recent))
-          :boat-from-left
-          (:you (last second-most-recent))
-          :boat-from-right)))))
-
-
-(defn every-possible-next-from-* [from, to]
-  (fn [fgbc-step]
-    (let [
-          items-to-carry
-          (clojure.set/difference (fgbc-step (index from)) #{:you :boat})
-          every-possible-step
-          (mapv
-            (fn [carry-item]
-              (->
-                fgbc-step
-                (update (index from) #(clojure.set/difference % #{:you carry-item}))
-                (update (index to) #(clojure.set/union % (if carry-item #{:you carry-item} #{:you})))))
-            (conj items-to-carry nil))]
-      (->>
-        every-possible-step
-        (filter boat-capacity-respected?)
-        (filter everyones-safe?)))))
-
-(def every-possible-next-from
-  {:left-bank (every-possible-next-from-* :left-bank :boat)
-   :boat-from-left (every-possible-next-from-* :boat :right-bank)
-   :right-bank (every-possible-next-from-* :right-bank :boat)
-   :boat-from-right (every-possible-next-from-* :boat :left-bank)})
-
-(defn every-possible-next-step [prev-steps]
-  (let [coming-from (find-where-are-you? prev-steps),
-        most-recent (last prev-steps)]
-    ((every-possible-next-from coming-from) most-recent)))
-
-(defn tree-with-root [r]
-  (new TreeNode r))
-
-(defn get-lowest-branches [^TreeNode tree]
-  (.getLowestBranches tree))
-
-(defn add-branches [^TreeNode tree, new-branch-vals]
-  (.addBranches tree new-branch-vals))
-
-(defn branch->prev-steps [^TreeNode branch]
-  (vec
-    (.nodeToValsList branch)))
-
-(defn build-up-tree [tree]
-  (doseq [branch (get-lowest-branches tree)]
-    (add-branches
-      branch
-      (every-possible-next-step
-        (branch->prev-steps branch)))))
-
-(defn found-result [tree]
-  (->>
-    (get-lowest-branches tree)
-    (filter
-      #(= ((.rootVal %) (index :right-bank)) #{:fox :goose :corn :you}))
-    (map
-      #(branch->prev-steps %))
-    first))
-
-
-(defn river-crossing-plan* [sp]
-  (let [tree (tree-with-root (first sp))]
-    (loop []
-      (do
-        (build-up-tree tree)
-        (or
-          (found-result tree)
-          (recur))))))
+(spec/fdef sets->vecs
+           :args (spec/cat :positions (spec/coll-of common-specs/step-instance-set))
+           :ret (spec/coll-of common-specs/step-instance-vec))
 
 ;(defn river-crossing-plan []
 ;  start-pos)
 (defn river-crossing-plan []
   (sets->vecs
-    (river-crossing-plan*
+    (chosen-solution/river-crossing-plan
       (vecs->sets start-pos))))
+
+
+(spec-test/instrument `sets->vecs)
+(spec-test/instrument `vecs->sets)
 
 (defn -main [& args]
   (time
@@ -150,4 +60,3 @@
 ; [[] [:boat] [:you :fox :goose :corn]]]
 ;nil
 ;"Elapsed time: 130.056998 msecs"
-

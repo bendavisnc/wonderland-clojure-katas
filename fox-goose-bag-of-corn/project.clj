@@ -8,6 +8,6 @@
   :source-paths ["src/clojure"]
   :plugins [[lein-auto "0.1.3"]]
   :java-source-paths ["src/java"]
-  :main fox-goose-bag-of-corn.puzzle-two)
+  :main fox-goose-bag-of-corn.puzzle)
 
 
