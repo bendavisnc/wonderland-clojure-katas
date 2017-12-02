@@ -19,3 +19,7 @@
       (spec/and
         set?
         (spec/coll-of keyword?)))))
+
+(def step-instance-collection
+  (spec/coll-of
+    (spec/or :set step-instance-set :vec step-instance-vec)))

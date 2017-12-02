@@ -2,12 +2,22 @@
   (:require [clojure.set]
             [clojure.pprint]
             [clojure.spec.alpha :as spec]
+            [fox-goose-bag-of-corn.puzzle.approach.queue-solution :as chosen-solution]
             [clojure.spec.test.alpha :as spec-test]
-            [fox-goose-bag-of-corn.puzzle.approach.java-solution :as chosen-solution]
             [fox-goose-bag-of-corn.puzzle.specs :as common-specs]))
 
+;[fox-goose-bag-of-corn.puzzle.approach.java-solution :as chosen-solution]
+
+
+(spec/check-asserts true)
 (def start-pos [[[:fox :goose :corn :you] [:boat] []]])
 
+;(spec/assert common-specs/step-instance-vec (first start-pos))
+
+(spec/assert common-specs/step-instance-vec (first start-pos))
+
+
+;[fox-goose-bag-of-corn.puzzle.approach.java-solution :as chosen-solution]
 ;[fox-goose-bag-of-corn.puzzle.approach.go-solution :as chosen-solution]
 
 (defn vecs->sets [positions]
