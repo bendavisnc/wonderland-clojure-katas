@@ -2,14 +2,14 @@
   (:require [clojure.core.async :as async]
             [fox-goose-bag-of-corn.puzzle.specs :as common-specs]
             [clojure.spec.alpha :as spec]
-            [clojure.spec.test.alpha :as spec-test]
             [fox-goose-bag-of-corn.puzzle.step-generation :as steps]
             [fox-goose-bag-of-corn.puzzle.logic :as logically]))
 
-(def new-node-chan (async/chan 1000))
+(def new-node-chan (async/chan)) ; this feels really dangerous.
 
 (defn add-new-node!! [n]
   (async/>!! new-node-chan n))
+
 
 (defn go-form [p]
   (async/go-loop []
@@ -22,17 +22,19 @@
             (if (logically/result-found? next)
               (deliver p farthest-so-far)
               ;else
-              (async/>! new-node-chan farthest-so-far))))
+              ;(async/>! new-node-chan farthest-so-far))))
+              (async/put! new-node-chan farthest-so-far))))
         (recur)))))
 
 (spec/fdef add-new-node!! :args (spec/cat :n (spec/coll-of common-specs/step-instance-set)))
 
-(spec-test/instrument `add-new-node!!)
-
 (defn river-crossing-plan [sp]
   (let [simple-p (promise)]
     (do
-      (go-form simple-p)
+      (doseq [_ (range 4)]
+        (go-form simple-p))
       (add-new-node!! sp)
       (deref simple-p))))
+
+
 

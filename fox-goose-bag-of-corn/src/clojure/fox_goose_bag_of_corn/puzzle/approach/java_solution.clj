@@ -19,8 +19,6 @@
   (vec
     (.nodeToValsList branch)))
 
-
-
 (defn build-up-tree [tree]
   (doseq [branch (get-lowest-branches tree)]
     (add-branches
@@ -45,7 +43,7 @@
 ;; 1. Adds new branches to its search tree.
 ;; 2. Looks for a result and either:
 ;;      on success returns that result
-;;      or on failure continues recursively
+;;      or continues recursively
 (defn river-crossing-plan [sp]
   (let [tree (tree-with-root (first sp))]
     (loop []

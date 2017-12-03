@@ -38,4 +38,3 @@
            :args (spec/cat :prev-steps (spec/coll-of common-specs/step-instance-set))
            :ret (spec/coll-of common-specs/step-instance-set))
 
-(spec-test/instrument `every-possible-next-step)

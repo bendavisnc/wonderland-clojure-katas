@@ -2,12 +2,24 @@
   (:require [clojure.set]
             [clojure.pprint]
             [clojure.spec.alpha :as spec]
-            [fox-goose-bag-of-corn.puzzle.approach.queue-solution :as chosen-solution]
+            [fox-goose-bag-of-corn.puzzle.approach.java-solution]
+            [fox-goose-bag-of-corn.puzzle.approach.go-solution]
+            [fox-goose-bag-of-corn.puzzle.approach.queue-solution]
             [clojure.spec.test.alpha :as spec-test]
             [fox-goose-bag-of-corn.puzzle.specs :as common-specs]))
 
-;[fox-goose-bag-of-corn.puzzle.approach.java-solution :as chosen-solution]
 
+;
+;(require chosen-solution)
+;(defmacro require-chosen [s]
+;  `(require '[~s :as chosen-solution]))
+
+;(require
+;  '[fox-goose-bag-of-corn.puzzle.approach.java-solution :as chosen-solution])
+
+;(def ^:dynamic river-crossing-plan* fox-goose-bag-of-corn.puzzle.approach.java-solution/river-crossing-plan)
+(def ^:dynamic river-crossing-plan* fox-goose-bag-of-corn.puzzle.approach.go-solution/river-crossing-plan)
+;(def ^:dynamic river-crossing-plan* fox-goose-bag-of-corn.puzzle.approach.queue-solution/river-crossing-plan)
 
 (spec/check-asserts true)
 (def start-pos [[[:fox :goose :corn :you] [:boat] []]])
@@ -15,7 +27,6 @@
 ;(spec/assert common-specs/step-instance-vec (first start-pos))
 
 (spec/assert common-specs/step-instance-vec (first start-pos))
-
 
 ;[fox-goose-bag-of-corn.puzzle.approach.java-solution :as chosen-solution]
 ;[fox-goose-bag-of-corn.puzzle.approach.go-solution :as chosen-solution]
@@ -40,18 +51,18 @@
 ;  start-pos)
 (defn river-crossing-plan []
   (sets->vecs
-    (chosen-solution/river-crossing-plan
+    (river-crossing-plan*
       (vecs->sets start-pos))))
 
 
-(spec-test/instrument `sets->vecs)
-(spec-test/instrument `vecs->sets)
+;(spec-test/instrument)
 
 (defn -main [& args]
   (time
-    (println
-      (clojure.pprint/pprint
-        (river-crossing-plan)))))
+    ;(binding [chosen-solution 'fox-goose-bag-of-corn.puzzle.approach.go-solution]
+      (println
+        (clojure.pprint/pprint
+          (river-crossing-plan)))))
 
 ;[[[:you :fox :goose :corn] [:boat] []]
 ; [[:fox :corn] [:you :boat :goose] []]

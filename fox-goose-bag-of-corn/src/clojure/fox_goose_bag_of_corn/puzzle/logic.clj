@@ -61,8 +61,3 @@
     (get (index :right-bank))
     (= #{:fox :goose :corn :you})))
 
-
-
-(spec-test/instrument `find-where-are-you?)
-(spec-test/instrument `everyones-safe?)
-(spec-test/instrument `boat-capacity-respected?)
