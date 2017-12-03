@@ -61,3 +61,5 @@
     (get (index :right-bank))
     (= #{:fox :goose :corn :you})))
 
+(spec/fdef result-found?
+           :args (spec/cat :fgbc-step common-specs/step-instance-set))

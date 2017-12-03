@@ -1,10 +1,14 @@
 (ns fox-goose-bag-of-corn.puzzle.approach.java-solution
   (:require [fox-goose-bag-of-corn.puzzle.logic :as logically]
             [fox-goose-bag-of-corn.puzzle.utilities :refer :all]
-            [fox-goose-bag-of-corn.puzzle.step-generation :as steps])
+            [fox-goose-bag-of-corn.puzzle.step-generation :as steps]
+            [clojure.spec.alpha :as spec]
+            [fox-goose-bag-of-corn.puzzle.specs :as common-specs])
 
   (:import (fox_goose_bag_of_corn.java TreeNode)))
 
+(defn treenode? [t]
+  (instance? TreeNode t))
 
 (defn tree-with-root [r]
   (new TreeNode r))
@@ -18,6 +22,10 @@
 (defn branch->prev-steps [^TreeNode branch]
   (vec
     (.nodeToValsList branch)))
+
+(spec/fdef branch->prev-steps
+           :args (spec/cat :branch treenode?)
+           :ret (spec/coll-of common-specs/step-instance-set))
 
 (defn build-up-tree [tree]
   (doseq [branch (get-lowest-branches tree)]

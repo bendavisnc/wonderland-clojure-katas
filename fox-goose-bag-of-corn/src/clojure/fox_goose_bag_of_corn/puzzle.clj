@@ -5,7 +5,8 @@
             [fox-goose-bag-of-corn.puzzle.approach.java-solution]
             [fox-goose-bag-of-corn.puzzle.approach.go-solution]
             [fox-goose-bag-of-corn.puzzle.approach.queue-solution]
-            [clojure.spec.test.alpha :as spec-test]
+            ;[clojure.spec.test.alpha :as spec-test]
+            [orchestra.spec.test :as spec-test]
             [fox-goose-bag-of-corn.puzzle.specs :as common-specs]))
 
 
@@ -19,6 +20,11 @@
 
 ;(def ^:dynamic river-crossing-plan* fox-goose-bag-of-corn.puzzle.approach.java-solution/river-crossing-plan)
 (def ^:dynamic river-crossing-plan* fox-goose-bag-of-corn.puzzle.approach.go-solution/river-crossing-plan)
+
+(defmacro with-plan [pfn form]
+  `(binding [river-crossing-plan* ~pfn]
+    ~form))
+
 ;(def ^:dynamic river-crossing-plan* fox-goose-bag-of-corn.puzzle.approach.queue-solution/river-crossing-plan)
 
 (spec/check-asserts true)
@@ -55,7 +61,7 @@
       (vecs->sets start-pos))))
 
 
-;(spec-test/instrument)
+(spec-test/instrument)
 
 (defn -main [& args]
   (time

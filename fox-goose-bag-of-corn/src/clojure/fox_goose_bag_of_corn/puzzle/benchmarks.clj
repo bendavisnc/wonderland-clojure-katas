@@ -1,21 +1,51 @@
-;(ns fox-goose-bag-of-corn.puzzle.benchmarks)
+(ns fox-goose-bag-of-corn.puzzle.benchmarks
+  (:require [fox-goose-bag-of-corn.puzzle :as puzzle]
+            [fox-goose-bag-of-corn.puzzle.approach.queue-solution]
+            [fox-goose-bag-of-corn.puzzle.approach.go-solution]
+            [fox-goose-bag-of-corn.puzzle.approach.java-solution]
+            [clojure.pprint :as pprint]))
+
+
 ;
-;(def java 'fox-goose-bag-of-corn.puzzle.approach.java-solution)
-;
-;(def queue 'fox-goose-bag-of-corn.puzzle.approach.queue-solution)
-;
-;(def go 'fox-goose-bag-of-corn.puzzle.approach.go-solution)
-;
-;
-;(def m {::java java
-;        ::queue queue
-;        ::go go})
-;
-;
-;;(defn benchmarks-run []
-;;  (reduce-kv
-;;    (fn [m k v]
-;;      nil)
-;;    {}
-;;    m))
-;
+(def template {::java fox-goose-bag-of-corn.puzzle.approach.java-solution/river-crossing-plan
+               ::queue fox-goose-bag-of-corn.puzzle.approach.java-solution/river-crossing-plan
+               ::go fox-goose-bag-of-corn.puzzle.approach.go-solution/river-crossing-plan})
+
+(defn run-result [plan-fn]
+  (future
+    (and
+      (puzzle/with-plan plan-fn
+        (puzzle/river-crossing-plan))
+      (System/currentTimeMillis))))
+
+
+(defn benchmarks-run []
+  (reduce-kv
+    (fn [m k v]
+      (assoc m k (run-result (template k))))
+    {}
+    template))
+
+(defn ran-benchmarks-run []
+  (reduce-kv
+    (fn [m k v]
+      (assoc m k (deref v)))
+    {}
+    (benchmarks-run)))
+
+(defn ran-benchmarks-run-sorted []
+  (->>
+    (ran-benchmarks-run)
+    seq
+    (sort-by
+      (fn [e]
+        (-> e
+          second
+          (* -1))))))
+
+
+(defn -main []
+  (do
+    (pprint/pprint
+      (ran-benchmarks-run-sorted))
+    (shutdown-agents)))
