@@ -34,7 +34,7 @@
     (fn [m k v]
       (assoc m k (deref v)))
     {}
-    (benchmarks-run))))
+    r)))
 
 (defn ran-benchmarks-run-sorted
   ([]
