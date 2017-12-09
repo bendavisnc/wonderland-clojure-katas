@@ -5,8 +5,8 @@
             [fox-goose-bag-of-corn.puzzle.step-generation :as steps]
             [fox-goose-bag-of-corn.puzzle.logic :as logically]))
 
-(def production-chan (async/chan))
-(def evaluation-chan (async/chan))
+(def production-chan (async/chan 1000))
+(def evaluation-chan (async/chan 1000))
 
 (defn add-first-node!! [n]
   (async/>!! production-chan n))
@@ -49,6 +49,5 @@
       (go-form simple-p)
       (add-first-node!! sp)
       (deref simple-p))))
-
 
 

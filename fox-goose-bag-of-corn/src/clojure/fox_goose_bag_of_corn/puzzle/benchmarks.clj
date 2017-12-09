@@ -26,22 +26,21 @@
     {}
     template))
 
-(defn ran-benchmarks-run []
-  (reduce-kv
+(defn ran-benchmarks-run
+  ([]
+   (ran-benchmarks-run (benchmarks-run)))
+  ([r]
+   (reduce-kv
     (fn [m k v]
       (assoc m k (deref v)))
     {}
-    (benchmarks-run)))
+    (benchmarks-run))))
 
-(defn ran-benchmarks-run-sorted []
-  (->>
-    (ran-benchmarks-run)
-    seq
-    (sort-by
-      (fn [e]
-        (-> e
-          second
-          (* -1))))))
+(defn ran-benchmarks-run-sorted
+  ([]
+   (ran-benchmarks-run-sorted (ran-benchmarks-run)))
+  ([r]
+   (->> r seq (sort-by #(-> % second (* -1))))))
 
 
 (defn -main []
