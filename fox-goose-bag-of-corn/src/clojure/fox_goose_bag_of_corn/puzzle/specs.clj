@@ -12,6 +12,9 @@
 
 
 
+;;
+;; eg
+;;   [{:fox}, {:goose, :moose}, {}]
 (def step-instance-set
   (spec/and
     vector?
@@ -23,3 +26,7 @@
 (def step-instance-collection
   (spec/coll-of
     (spec/or :set step-instance-set :vec step-instance-vec)))
+
+(def step-instance-collection-set
+  (spec/coll-of
+    step-instance-set))

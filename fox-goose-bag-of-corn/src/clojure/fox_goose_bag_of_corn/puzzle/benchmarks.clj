@@ -16,9 +16,12 @@
 (defn run-result [plan-fn]
   (future
     (and
-      (puzzle/with-plan plan-fn
-        (puzzle/river-crossing-plan))
-      (System/currentTimeMillis))))
+      (try
+        (do
+          (puzzle/with-plan plan-fn
+            (puzzle/river-crossing-plan))
+          (System/currentTimeMillis))
+        (catch Throwable e :fail)))))
 
 (spec/fdef run-result
            :args (spec/cat :plan-fn fn?)
@@ -47,7 +50,7 @@
     r)))
 
 (spec/fdef ran-benchmarks-run
-           :ret (spec/map-of keyword? number?))
+           :ret (spec/map-of keyword? (spec/or :n number? :k keyword?)))
 
 (defn ran-benchmarks-run-sorted
   ([]
@@ -86,7 +89,6 @@
              (into [index (time-diff (first r) e)])))))
      (range (count r))
      r)))
-
 
 (spec-test/instrument)
 
