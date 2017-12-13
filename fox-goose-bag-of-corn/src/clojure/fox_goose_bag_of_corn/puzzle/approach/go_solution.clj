@@ -16,6 +16,7 @@
   (async/>!! origin-chan n))
 
 (spec/fdef add-first-node!! :args (spec/cat :n common-specs/step-instance-collection-set))
+;(spec/fdef add-first-node!! :args (spec/cat :n double?))
 
 (defn close-and-deliver [p, path-steps]
   (do

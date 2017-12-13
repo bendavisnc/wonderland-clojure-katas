@@ -1,8 +1,7 @@
 (ns fox-goose-bag-of-corn.puzzle.logic
   (:require [clojure.spec.alpha :as spec]
-            [clojure.spec.test.alpha :as spec-test]
-            [clojure.spec.alpha :as spec]
             [fox-goose-bag-of-corn.puzzle.utilities :refer :all]
+            [clojure.set]
             [fox-goose-bag-of-corn.puzzle.specs :as common-specs]))
 
 

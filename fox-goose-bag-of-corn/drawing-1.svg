@@ -25,9 +25,9 @@
      borderopacity="1.0"
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
-     inkscape:zoom="1.979899"
-     inkscape:cx="397.60196"
-     inkscape:cy="804.85094"
+     inkscape:zoom="1.4"
+     inkscape:cx="373.5363"
+     inkscape:cy="491.61703"
      inkscape:document-units="px"
      inkscape:current-layer="layer1"
      showgrid="false"
@@ -165,7 +165,7 @@
          sodipodi:role="line"
          x="42.574852"
          y="443.02661"
-         id="tspan4190">we ask it's out candidate winner?</tspan></text>
+         id="tspan4190">we ask it's our candidate winner?</tspan></text>
     <path
        inkscape:connector-curvature="0"
        id="path4192"
@@ -203,5 +203,87 @@
          x="391.44424"
          id="tspan4209"
          sodipodi:role="line">origin-chan</tspan></text>
+    <ellipse
+       style="color:#000000;clip-rule:nonzero;display:inline;overflow:visible;visibility:visible;opacity:1;isolation:auto;mix-blend-mode:normal;color-interpolation:sRGB;color-interpolation-filters:linearRGB;solid-color:#000000;solid-opacity:1;fill:#0000ff;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:1.12314844;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;marker:none;color-rendering:auto;image-rendering:auto;shape-rendering:auto;text-rendering:auto;enable-background:accumulate"
+       id="ellipse4230"
+       cx="423.64987"
+       cy="711.99963"
+       rx="32.317101"
+       ry="30.848143" />
+    <text
+       xml:space="preserve"
+       style="font-style:normal;font-weight:normal;font-size:10.65128326px;line-height:125%;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#ffffff;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       x="395.60294"
+       y="718.7038"
+       id="text4232"
+       sodipodi:linespacing="125%"><tspan
+         sodipodi:role="line"
+         id="tspan4234"
+         x="395.60294"
+         y="718.7038">process</tspan></text>
+    <text
+       sodipodi:linespacing="125%"
+       id="text4236"
+       y="832.84436"
+       x="261.23477"
+       style="font-style:normal;font-weight:normal;font-size:10.65128326px;line-height:125%;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       xml:space="preserve"
+       transform="matrix(0.96592583,-0.25881905,0.25881905,0.96592583,0,0)"><tspan
+         id="tspan4240"
+         y="832.84436"
+         x="261.23477"
+         sodipodi:role="line">chan that enables taking a root and adding children </tspan><tspan
+         y="846.15845"
+         x="261.23477"
+         sodipodi:role="line"
+         id="tspan4262">to the origin chan</tspan></text>
+    <text
+       sodipodi:linespacing="125%"
+       id="text4242"
+       y="707.29236"
+       x="391.80139"
+       style="font-style:normal;font-weight:normal;font-size:10.65128326px;line-height:125%;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#ffffff;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       xml:space="preserve"><tspan
+         y="707.29236"
+         x="391.80139"
+         id="tspan4244"
+         sodipodi:role="line">tree growing</tspan></text>
+    <text
+       sodipodi:linespacing="125%"
+       id="text4246"
+       y="784.45819"
+       x="42.574852"
+       style="font-style:normal;font-weight:normal;font-size:10.65128326px;line-height:125%;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#666666;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       xml:space="preserve"><tspan
+         id="tspan4248"
+         y="784.45819"
+         x="42.574852"
+         sodipodi:role="line">... if not... </tspan></text>
+    <path
+       style="fill:none;fill-rule:evenodd;stroke:#666666;stroke-width:1;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:1, 3;stroke-dashoffset:0;stroke-opacity:1"
+       d="m 11.428571,800.93662 671.428569,0"
+       id="path4250"
+       inkscape:connector-curvature="0" />
+    <g
+       style="fill:#666666;fill-opacity:1;stroke:#666666;stroke-opacity:1"
+       transform="matrix(-0.02881621,-0.99958473,0.99958473,-0.02881621,222.92723,942.48231)"
+       id="g4252">
+      <text
+         xml:space="preserve"
+         style="font-style:normal;font-weight:normal;font-size:40px;line-height:125%;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#666666;fill-opacity:1;stroke:#666666;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+         x="400.71429"
+         y="220.21935"
+         id="text4254"
+         sodipodi:linespacing="125%"><tspan
+           sodipodi:role="line"
+           id="tspan4256"
+           x="400.71429"
+           y="220.21935">&lt;!</tspan></text>
+      <path
+         style="fill:#666666;fill-opacity:1;fill-rule:evenodd;stroke:#666666;stroke-width:3;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+         d="m 263.02611,207.71935 134.28571,0"
+         id="path4258"
+         inkscape:connector-curvature="0" />
+    </g>
   </g>
 </svg>

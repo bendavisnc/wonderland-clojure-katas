@@ -4,6 +4,7 @@
             [clojure.spec.alpha :as spec]
             [fox-goose-bag-of-corn.puzzle.approach.java-solution]
             [fox-goose-bag-of-corn.puzzle.approach.go-solution]
+            [fox-goose-bag-of-corn.puzzle.approach.teachers-answer]
             [fox-goose-bag-of-corn.puzzle.approach.queue-solution]
             ;[clojure.spec.test.alpha :as spec-test]
             [orchestra.spec.test :as spec-test]
@@ -43,6 +44,7 @@
 
 (spec/fdef vecs->sets
            :args (spec/cat :positions (spec/coll-of common-specs/step-instance-vec))
+           ;:args (spec/cat :positions (spec/coll-of double?))
            :ret (spec/coll-of common-specs/step-instance-set))
 
 (defn sets->vecs [positions]
