@@ -1,5 +1,5 @@
 
 cd ../
-lein run -m fox-goose-bag-of-corn.puzzle
+lein auto run -m fox-goose-bag-of-corn.puzzle
 
 

@@ -6,26 +6,20 @@
             [fox-goose-bag-of-corn.puzzle.approach.go-solution]
             [fox-goose-bag-of-corn.puzzle.approach.teachers-answer]
             [fox-goose-bag-of-corn.puzzle.approach.queue-solution]
+            [fox-goose-bag-of-corn.puzzle.approach.zipper-solution]
             [orchestra.spec.test :as spec-test]
             [fox-goose-bag-of-corn.puzzle.specs.puzzle :as puzzle-specs]))
 
 
-;
-;(require chosen-solution)
-;(defmacro require-chosen [s]
-;  `(require '[~s :as chosen-solution]))
-
-;(require
-;  '[fox-goose-bag-of-corn.fox-goose-bag-of-corn.puzzle.specs.puzzlee.approach.java-solution :as chosen-solution])
-
-(def ^:dynamic river-crossing-plan* fox-goose-bag-of-corn.puzzle.approach.java-solution/river-crossing-plan)
-;(def ^:dynamic river-crossing-plan* fox-goose-bag-of-corn.fox-goose-bag-of-corn.puzzle.specs.puzzlee.approach.go-solution/river-crossing-plan)
+;(def ^:dynamic river-crossing-plan* fox-goose-bag-of-corn.puzzle.approach.queue-solution/river-crossing-plan)
+;(def ^:dynamic river-crossing-plan* fox-goose-bag-of-corn.puzzle.approach.java-solution/river-crossing-plan)
+(def ^:dynamic river-crossing-plan* fox-goose-bag-of-corn.puzzle.approach.zipper-solution/river-crossing-plan)
+;(def ^:dynamic river-crossing-plan* fox-goose-bag-of-corn.puzzle.approach.teachers-answer/river-crossing-plan)
 
 (defmacro with-plan [pfn form]
   `(binding [river-crossing-plan* ~pfn]
     ~form))
 
-;(def ^:dynamic river-crossing-plan* fox-goose-bag-of-corn.fox-goose-bag-of-corn.puzzle.specs.puzzlee.approach.queue-solution/river-crossing-plan)
 
 (spec/check-asserts true)
 (def start-pos [[[:fox :goose :corn :you] [:boat] []]])
@@ -34,8 +28,6 @@
 
 (spec/assert puzzle-specs/step-instance-vec (first start-pos))
 
-;[fox-goose-bag-of-corn.fox-goose-bag-of-corn.puzzle.specs.puzzlee.approach.java-solution :as chosen-solution]
-;[fox-goose-bag-of-corn.fox-goose-bag-of-corn.puzzle.specs.puzzlee.approach.go-solution :as chosen-solution]
 
 (defn vecs->sets [positions]
   "A vec of vecs of vecs -> a vec of vecs of sets"
@@ -54,8 +46,6 @@
            :args (spec/cat :positions (spec/coll-of puzzle-specs/step-instance-set))
            :ret (spec/coll-of puzzle-specs/step-instance-vec))
 
-;(defn river-crossing-plan []
-;  start-pos)
 (defn river-crossing-plan []
   (sets->vecs
     (river-crossing-plan*

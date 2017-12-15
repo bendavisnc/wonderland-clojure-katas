@@ -128,7 +128,7 @@
            :ret tree-specs/tree)
 
 (defn river-crossing-plan [sp]
-  (loop [simple-t (mapzipper {:node-val sp})]
+  (loop [simple-t (mapzipper {:node-val (first sp)})]
     (or
       (found-result simple-t)
       (recur
@@ -140,4 +140,4 @@
   (time
     (pprint/pprint
       (river-crossing-plan
-        [#{:fox :goose :corn :you} #{:boat} #{}]))))
+        [[#{:fox :goose :corn :you} #{:boat} #{}]]))))
