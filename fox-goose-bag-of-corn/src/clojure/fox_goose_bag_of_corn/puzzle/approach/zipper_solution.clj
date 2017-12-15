@@ -1,5 +1,6 @@
 (ns fox-goose-bag-of-corn.puzzle.approach.zipper-solution
   (:require
+    [fox-goose-bag-of-corn.puzzle.utilities :refer :all]
     [fox-goose-bag-of-corn.puzzle.specs :as common-specs]
     [clojure.spec.alpha :as spec]
     [clojure.zip :as z]
@@ -20,10 +21,10 @@
 
 (defn bottom-branch? [n]
   (and
-    (not (z/branch? n))
-    (not
-      (= n
-         (-> n z/leftmost)))))
+    (not (z/branch? n))))
+    ;(not
+    ;  (= n
+    ;     (-> n z/leftmost))))
 
 
 (defn- tree? [t]
@@ -34,21 +35,6 @@
     ;(map? t)
     ;(:node-val t)))
 
-(defn mapzipper [m]
-  (z/zipper
-    ; branch
-    (fn [b]
-      (and
-        b
-        (map? b)
-        (:node-val b)))
-    ; children (unzip)
-    (fn [n]
-      (:children n))
-    ; make node (zip)
-    (fn [n c]
-      (assoc n :children c))
-    m))
 
 
 
@@ -179,7 +165,7 @@
 (defn branch->prev-steps [tree]
   (conj
     (mapv
-      z/node
+      :node-val
       (z/path tree))
     (z/node tree)))
 
@@ -204,7 +190,8 @@
   (if (empty? next-steps)
     tree
     (recur
-      (z/insert-right tree (first next-steps))
+      ;(z/insert-right tree (first next-steps))
+      (z/insert-child tree (first next-steps))
       (rest next-steps))))
 
 ;(defn tree-walker-fn [n]
