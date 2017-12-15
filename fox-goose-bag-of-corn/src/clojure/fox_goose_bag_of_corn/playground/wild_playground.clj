@@ -12,6 +12,15 @@
                :children [{:node-val "orange"}, {:node-val "mango"}]}]})
 
 
+(def dummy-tree-raw-vect
+  [:a
+   [4 "banana" "apple"]
+   [5 "orange" "mango"]])
+
+(def dummy-tree-vect
+  (z/vector-zip dummy-tree-raw-vect))
+
+
 (def dummy-tree
   (z/zipper
     ; branch

@@ -10,10 +10,24 @@
     [clojure.walk :as walk]))
 
 
+;(defn bottom-branch? [n]
+;  (if (nil? n)
+;    nil
+;    (nil? (z/down n))))
+;
+
 (defn bottom-branch? [n]
-  (if (nil? n)
-    nil
-    (nil? (z/down n))))
+  (and
+    (not (z/branch? n))
+    (not
+      (= n
+         (-> n z/leftmost)))))
+
+
+(defn- tree? [t]
+  (and
+    (vector? t)
+    (= (count t) 2)))
 
 (defn get-lowest-branches [tree]
   (loop [acc []
@@ -26,14 +40,22 @@
       :default
       (recur acc (z/next n)))))
 
+
 (defn branch->prev-steps [tree]
-  (loop [acc []
-         n tree]
-    (cond
-      (nil? (z/up n))
-      (conj acc (z/node n))
-      :default
-      (recur (conj acc (z/node n)) (z/up n)))))
+  (conj
+    (mapv
+      z/node
+      (z/path tree))
+    (z/node tree)))
+
+
+  ;(loop [acc []
+  ;       n tree
+  ;  (cond
+  ;    (nil? (z/up n))
+  ;    (conj acc (z/node n))
+  ;    :default
+  ;    (recur (conj acc (z/node n)) (z/up n)))
 
 (defn found-result [tree]
   (->>
@@ -43,6 +65,12 @@
     (map
       #(branch->prev-steps %))
     first))
+
+;(spec/def ::tree tree?)
+
+(spec/fdef found-result
+           :args (spec/cat :tree tree?))
+
 
 (defn add-branches [tree next-steps]
   (if (empty? next-steps)
@@ -74,6 +102,8 @@
       (recur
         (z/vector-zip
           (expanded-tree simple-t))))))
+
+(spec-test/instrument)
 
 (defn -main [& args]
   (time

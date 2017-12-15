@@ -6,7 +6,6 @@
             [fox-goose-bag-of-corn.puzzle.approach.go-solution]
             [fox-goose-bag-of-corn.puzzle.approach.teachers-answer]
             [fox-goose-bag-of-corn.puzzle.approach.queue-solution]
-            ;[clojure.spec.test.alpha :as spec-test]
             [orchestra.spec.test :as spec-test]
             [fox-goose-bag-of-corn.puzzle.specs :as common-specs]))
 
@@ -19,8 +18,8 @@
 ;(require
 ;  '[fox-goose-bag-of-corn.puzzle.approach.java-solution :as chosen-solution])
 
-;(def ^:dynamic river-crossing-plan* fox-goose-bag-of-corn.puzzle.approach.java-solution/river-crossing-plan)
-(def ^:dynamic river-crossing-plan* fox-goose-bag-of-corn.puzzle.approach.go-solution/river-crossing-plan)
+(def ^:dynamic river-crossing-plan* fox-goose-bag-of-corn.puzzle.approach.java-solution/river-crossing-plan)
+;(def ^:dynamic river-crossing-plan* fox-goose-bag-of-corn.puzzle.approach.go-solution/river-crossing-plan)
 
 (defmacro with-plan [pfn form]
   `(binding [river-crossing-plan* ~pfn]
