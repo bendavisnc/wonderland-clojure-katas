@@ -32,7 +32,7 @@
   (testing "expanded-tree"
     (is (=
           (->
-            (zt/expand-tree dummy-tree)
+            (zt/build-up-tree dummy-tree)
             z/node)
           {:node-val [#{:you :fox :goose :corn} #{:boat} #{}],
            :children [{:node-val [#{:fox :corn} #{:you :boat :goose} #{}]}]}))))
