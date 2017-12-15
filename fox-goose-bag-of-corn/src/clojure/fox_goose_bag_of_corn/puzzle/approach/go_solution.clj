@@ -1,6 +1,6 @@
 (ns fox-goose-bag-of-corn.puzzle.approach.go-solution
   (:require [clojure.core.async :as async]
-            [fox-goose-bag-of-corn.puzzle.specs :as common-specs]
+            [fox-goose-bag-of-corn.puzzle.specs.puzzle :as puzzle-specs]
             [clojure.spec.alpha :as spec]
             [fox-goose-bag-of-corn.puzzle.step-generation :as steps]
             [fox-goose-bag-of-corn.puzzle.logic :as logically]
@@ -15,7 +15,7 @@
 (defn add-first-node!! [n]
   (async/>!! origin-chan n))
 
-(spec/fdef add-first-node!! :args (spec/cat :n common-specs/step-instance-collection-set))
+(spec/fdef add-first-node!! :args (spec/cat :n puzzle-specs/step-instance-collection-set))
 ;(spec/fdef add-first-node!! :args (spec/cat :n double?))
 
 (defn close-and-deliver [p, path-steps]
@@ -24,7 +24,7 @@
       (async/close! c))
     (deliver p path-steps)))
   ;else
-(spec/fdef close-and-deliver :args (spec/cat :p #(instance? IPending %) :success-r common-specs/step-instance-collection-set))
+(spec/fdef close-and-deliver :args (spec/cat :p #(instance? IPending %) :success-r puzzle-specs/step-instance-collection-set))
 
 
 (defn search-successful? [path-steps]

@@ -2,7 +2,7 @@
   (:require [fox-goose-bag-of-corn.puzzle.logic :as logically]
             [fox-goose-bag-of-corn.puzzle.utilities :refer :all]
             [clojure.spec.alpha :as spec]
-            [fox-goose-bag-of-corn.puzzle.specs :as common-specs]
+            [fox-goose-bag-of-corn.puzzle.specs.puzzle :as puzzle-specs]
             [clojure.spec.test.alpha :as spec-test]))
 
 (defn every-possible-next-from-* [from, to]
@@ -35,6 +35,6 @@
     ((every-possible-next-from coming-from) most-recent)))
 
 (spec/fdef every-possible-next-step
-           :args (spec/cat :prev-steps (spec/coll-of common-specs/step-instance-set))
-           :ret (spec/coll-of common-specs/step-instance-set))
+           :args (spec/cat :prev-steps puzzle-specs/step-instance-collection-set)
+           :ret puzzle-specs/step-instance-collection-set)
 

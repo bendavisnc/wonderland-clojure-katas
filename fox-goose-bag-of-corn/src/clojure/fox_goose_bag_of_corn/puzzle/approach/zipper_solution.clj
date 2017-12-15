@@ -1,7 +1,8 @@
 (ns fox-goose-bag-of-corn.puzzle.approach.zipper-solution
   (:require
     [fox-goose-bag-of-corn.puzzle.utilities :refer :all]
-    [fox-goose-bag-of-corn.puzzle.specs :as common-specs]
+    [fox-goose-bag-of-corn.puzzle.specs.puzzle :as puzzle-specs]
+    [fox-goose-bag-of-corn.puzzle.specs.tree :as tree-specs]
     [clojure.spec.alpha :as spec]
     [clojure.zip :as z]
     ;[clojure.spec.test.alpha :as spec-test]
@@ -13,141 +14,32 @@
     [orchestra.spec.test :as spec-test]))
 
 
-;(defn bottom-branch? [n]
-;  (if (nil? n)
-;    nil
-;    (nil? (z/down n))))
-;
 
 (defn bottom-branch? [n]
   (and
-    (not (z/branch? n))))
-    ;(not
-    ;  (= n
-    ;     (-> n z/leftmost))))
+    (not (z/down n))))
+    ;(not (z/branch? n))))
 
+(spec/fdef bottom-branch?
+           :args (spec/cat :n tree-specs/tree)
+           :ret boolean?)
 
-(defn- tree? [t]
-  (and
-    (vector t)
-    (= 2 (count t))
-    (get-in t [0 :node-val])))
-    ;(map? t)
-    ;(:node-val t)))
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-;;(def dummy-tree
-;;  (->
-;;    (z/vector-zip [:first])
-;;    (z/insert-child [:fourth :second])
-;;    (z/insert-child :third)))
 ;
-(def dummy-tree-two
-  (z/vector-zip
-    [:a
-     [4
-      ["banana", "apple"]]
-     [5
-      ["orange", "mango"]]]))
-;[[[:fifth] :third] [[:fourth] :second] :first]))
+;(defn bottom? [t]
+;  (and
+;    (nil? (z/down t))
+;    (or
+;      (nil? (z/right t))
+;      (not (z/branch? (z/right t))))))
 ;
-;
-;
-;;(defn print-whatnot [t]
-;;  (walk/postwalk
-;;    (fn [tnode]
-;;      (do
-;;        (println tnode)
-;;        tnode))
-;;    t))
-;
-(defn print-tree [t]
-  (if (z/end? t)
-    (println "end")
-    (do
-      (println (or (:node-val (z/node t)) (z/node t)))
-      (recur (z/next t)))))
-;
-(defn bottom? [t]
-  (and
-    (nil? (z/down t))
-    (or
-      (nil? (z/right t))
-      (not (z/branch? (z/right t))))))
-
 ;(defn make-item [t]
-;  (loop [acc "", t* t]
-;    (cond
-;      (nil? (z/up t*)) ; at top?
-;      acc
-;      (sequential? (z/node t*))
-;      (recur
-;        acc
-;        (-> t* z/up z/leftmost))
-;      :default
-;      (recur
-;        (str acc (:node-val (z/node t*)))
-;        (-> t* z/up z/leftmost)))))
-
-;(defn make-item [t]
-;  (let [extend-acc #(str %2 (or (:node-val (z/node %1)) (z/node %1)))]
-;    (loop [acc "", t* t]
-;      (cond
-;        (nil? (z/up t*))
-;        (extend-acc t* acc)
-;        :default
-;        (recur
-;          (extend-acc t* acc)
-;          (z/up t*))))))
-
-(defn make-item [t]
-  (clojure.string/join
-    (map
-      #(or (:node-val (z/node %)) (z/node %))
-      (filter
-        (fn [t*]
-          ;(not (z/branch? t*))
-          (not (vector? (z/node t*))))
-        (z-util/ancestors t)))))
-
-
-
-(defn dummy-tree-parsing [tree]
-  (loop [acc [], t tree]
-
-    (cond
-      (z/end? t)
-      acc
-
-      (bottom? t)
-      (recur
-        (conj acc (make-item t))
-        (z/next t))
-
-      :default
-      (recur
-        acc
-        (z/next t)))))
-
-(defn -main [& args]
-  (time
-    (println
-      ;(dummy-tree-parsing dummy-tree)
-      (dummy-tree-parsing dummy-tree-two))))
-
-
+;  (clojure.string/join
+;    (map
+;      #(or (:node-val (z/node %)) (z/node %))
+;      (filter
+;        (fn [t*]
+;          (not (vector? (z/node t*))))
+;        (z-util/ancestors t)))))
 
 
 (defn get-lowest-branches [tree]
@@ -161,13 +53,24 @@
       :default
       (recur acc (z/next n)))))
 
-
 (defn branch->prev-steps [tree]
-  (conj
-    (mapv
-      :node-val
-      (z/path tree))
-    (z/node tree)))
+  (loop [acc () t* tree]
+    (cond
+      (nil? (z/up t*))
+      (into [] (conj acc (:node-val (z/node t*))))
+      :default
+      (recur
+        (conj acc (:node-val (z/node t*)))
+        (z/up t*)))))
+  ;(mapv
+  ;  :node-val
+  ;  (conj
+  ;    (or (z/path tree) [])
+  ;    (z/node tree))))
+
+(spec/fdef branch->prev-steps
+           :args (spec/cat :tree tree-specs/tree))
+           ;:ret puzzle-specs/step-instance-collection-set)
 
 
 (defn found-result [tree]
@@ -175,7 +78,7 @@
     (get-lowest-branches tree)
     (filter
       (fn [n]
-        (logically/result-found? (z/node n))))
+        (logically/result-found? (:node-val (z/node n)))))
       ;#(logically/result-found? (z/node %)))
     (map
       #(branch->prev-steps %))
@@ -184,7 +87,8 @@
 ;(spec/def ::tree tree?)
 
 (spec/fdef found-result
-           :args (spec/cat :tree tree?))
+           :args (spec/cat :tree tree-specs/tree)
+           :ret (spec/or :nil nil? :tree tree-specs/tree))
 
 (defn add-branches [tree next-steps]
   (if (empty? next-steps)
@@ -194,44 +98,31 @@
       (z/insert-child tree (first next-steps))
       (rest next-steps))))
 
-;(defn tree-walker-fn [n]
-;  (cond
-;    (bottom-branch? n)
-;    (add-branches
-;      n
-;      (steps/every-possible-next-step (branch->prev-steps n)))
-;    :default
-;    n))
-;;(loop [current-node tree]
-;
-;(defn expanded-tree [tree]
-;  (walk/postwalk
-;    tree-walker-fn
-;    tree))
+(spec/fdef add-branches
+           ;:args (spec/cat :tree tree-specs/tree :next-steps puzzle-specs/step-instance-collection-set)
+           :args (spec/cat :tree tree-specs/tree :next-steps coll?)
+           :ret tree-specs/tree)
+
 
 (defn next-extended [tree steps]
-  (->
-    tree
-    (z/edit
-      tree
-      (fn [t]
-        (add-branches t steps)))
-    z/up
-    z/right
-    z/down))
+  (let [ext
+        (-> tree
+          (z/replace
+            (add-branches tree steps)))]
+    (cond
+      (z/end? ext)
+      ext
+      (-> ext z/up z/right)
+      (-> ext z/up z/right)
+      (-> ext z/up)
+      (-> ext z/up)
+      :default
+      ext)))
+    ;z/down))
 
 (spec/fdef next-extended
-           :args (spec/cat :tree tree?)
-           :ret tree?)
-
-(defn root
-  [loc]
-  (if (= :end (loc 1))
-    loc
-    (let [p (z/up loc)]
-      (if p
-        (recur p)
-        loc))))
+           :args (spec/cat :tree tree-specs/tree :steps puzzle-specs/step-instance-collection-set)
+           :ret tree-specs/tree)
 
 
 (defn expand-tree [tree]
@@ -242,13 +133,15 @@
       ;(z-util/ancestors)
       (bottom-branch? n)
       (recur
+        ;(next-extended n (steps/every-possible-next-step (branch->prev-steps n)))
+        ;(next-extended n (steps/every-possible-next-step (spec/assert puzzle-specs/step-instance-collection-set (branch->prev-steps n))))
         (next-extended n (steps/every-possible-next-step (branch->prev-steps n))))
       :default
       (recur (z/next n)))))
 
 (spec/fdef expand-tree
-           :args (spec/cat :tree tree?)
-           :ret tree?)
+           :args (spec/cat :tree tree-specs/tree)
+           :ret tree-specs/tree)
 
 (defn river-crossing-plan [sp]
   ;(loop [simple-t (z/vector-zip [sp])])
@@ -264,4 +157,4 @@
   (time
     (pprint/pprint
       (river-crossing-plan
-        [[#{:fox :goose :corn :you} #{:boat} #{}]]))))
+        [#{:fox :goose :corn :you} #{:boat} #{}]))))

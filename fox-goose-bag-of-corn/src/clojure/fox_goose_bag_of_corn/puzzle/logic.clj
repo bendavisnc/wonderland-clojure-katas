@@ -2,7 +2,7 @@
   (:require [clojure.spec.alpha :as spec]
             [fox-goose-bag-of-corn.puzzle.utilities :refer :all]
             [clojure.set]
-            [fox-goose-bag-of-corn.puzzle.specs :as common-specs]))
+            [fox-goose-bag-of-corn.puzzle.specs.puzzle :as puzzle-specs]))
 
 
 (defn find-where-are-you? [prev-steps]
@@ -22,7 +22,7 @@
 
 
 (spec/fdef find-where-are-you?
-           :args (spec/cat :prev-steps (spec/coll-of common-specs/step-instance-set))
+           :args (spec/cat :prev-steps (spec/coll-of puzzle-specs/step-instance-set))
            :ret #{:left-bank, :right-bank, :boat-from-left, :boat-from-right})
 
 
@@ -42,7 +42,7 @@
     empty?))                ; not empty = someone's not safe
 
 (spec/fdef everyones-safe?
-           :args (spec/cat :fgbc-step common-specs/step-instance-set))
+           :args (spec/cat :fgbc-step puzzle-specs/step-instance-set))
 
 (defn boat-capacity-respected? [fgbc-step]
   (->
@@ -52,7 +52,7 @@
     (<= 3)))
 
 (spec/fdef boat-capacity-respected?
-           :args (spec/cat :fgbc-step common-specs/step-instance-set))
+           :args (spec/cat :fgbc-step puzzle-specs/step-instance-set))
 
 (defn result-found? [fgbc-step]
 ;#(= ((.rootVal %) (index :right-bank))
@@ -61,4 +61,4 @@
     (= #{:fox :goose :corn :you})))
 
 (spec/fdef result-found?
-           :args (spec/cat :fgbc-step common-specs/step-instance-set))
+           :args (spec/cat :fgbc-step puzzle-specs/step-instance-set))

@@ -1,5 +1,10 @@
-(ns fox-goose-bag-of-corn.puzzle.specs
+(ns fox-goose-bag-of-corn.puzzle.specs.puzzle
   (:require [clojure.spec.alpha :as spec]))
+
+
+;;
+;;
+;; fox-goose-bag-of-corn.puzzle.specs.puzzlee specific
 
 (def step-instance-vec
   (spec/and
@@ -8,9 +13,6 @@
       (spec/and
         vector?
         (spec/coll-of keyword?)))))
-
-
-
 
 ;;
 ;; eg
@@ -30,3 +32,6 @@
 (def step-instance-collection-set
   (spec/coll-of
     step-instance-set))
+
+
+

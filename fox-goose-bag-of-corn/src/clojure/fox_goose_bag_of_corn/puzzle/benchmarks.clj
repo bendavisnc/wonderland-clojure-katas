@@ -14,15 +14,15 @@
                 ::teachers-answer fox-goose-bag-of-corn.puzzle.approach.teachers-answer/river-crossing-plan
                 ::java fox-goose-bag-of-corn.puzzle.approach.java-solution/river-crossing-plan
                 ::queue fox-goose-bag-of-corn.puzzle.approach.queue-solution/river-crossing-plan))
-               ;::go fox-goose-bag-of-corn.puzzle.approach.go-solution/river-crossing-plan})
+               ;::go fox-goose-bag-of-corn.fox-goose-bag-of-corn.puzzle.specs.puzzlee.approach.go-solution/river-crossing-plan})
 
 ;(defn run-result [plan-fn]
 ;  (future
 ;    (and
 ;      (try
 ;        (do
-;          (puzzle/with-plan plan-fn
-;            (puzzle/river-crossing-plan))
+;          (fox-goose-bag-of-corn.puzzle.specs.puzzlee/with-plan plan-fn
+;            (fox-goose-bag-of-corn.puzzle.specs.puzzlee/river-crossing-plan))
 ;          (System/currentTimeMillis))
 ;        (catch Throwable e :fail)))))
 

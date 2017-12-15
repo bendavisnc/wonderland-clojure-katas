@@ -1,6 +1,6 @@
 (ns fox-goose-bag-of-corn.puzzle.approach.queue-solution
   (:require
-    [fox-goose-bag-of-corn.puzzle.specs :as common-specs]
+    [fox-goose-bag-of-corn.puzzle.specs.puzzle :as puzzle-specs]
     [fox-goose-bag-of-corn.puzzle.step-generation :as steps]
     [fox-goose-bag-of-corn.puzzle.logic :as logically]
     [clojure.spec.alpha :as spec]
@@ -20,8 +20,8 @@
 (spec/fdef add-to-q
   :args (spec/cat
           :q queue?
-          :items common-specs/step-instance-collection
-          :path-steps common-specs/step-instance-collection-set)
+          :items puzzle-specs/step-instance-collection
+          :path-steps puzzle-specs/step-instance-collection-set)
   :ret queue?)
 
 
@@ -34,7 +34,7 @@
 
 (defn river-crossing-plan [sp]
   (loop [simple-q (conj PersistentQueue/EMPTY sp)]
-    (let [path-steps (spec/assert common-specs/step-instance-collection (first simple-q))
+    (let [path-steps (spec/assert puzzle-specs/step-instance-collection-set (first simple-q))
           all-possible-nexts (steps/every-possible-next-step path-steps)]
       (if (logically/result-found? (last path-steps))
         path-steps

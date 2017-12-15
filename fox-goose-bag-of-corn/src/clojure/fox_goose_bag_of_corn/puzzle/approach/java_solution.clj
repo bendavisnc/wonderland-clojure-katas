@@ -3,7 +3,9 @@
             [fox-goose-bag-of-corn.puzzle.utilities :refer :all]
             [fox-goose-bag-of-corn.puzzle.step-generation :as steps]
             [clojure.spec.alpha :as spec]
-            [fox-goose-bag-of-corn.puzzle.specs :as common-specs])
+            [fox-goose-bag-of-corn.puzzle.specs.puzzle :as puzzle-specs]
+            [clojure.pprint :as pprint]
+            [orchestra.spec.test :as spec-test])
 
   (:import (fox_goose_bag_of_corn.java TreeNode)))
 
@@ -25,7 +27,7 @@
 
 (spec/fdef branch->prev-steps
            :args (spec/cat :branch treenode?)
-           :ret (spec/coll-of common-specs/step-instance-set))
+           :ret puzzle-specs/step-instance-collection-set)
 
 (defn build-up-tree [tree]
   (doseq [branch (get-lowest-branches tree)]
@@ -60,3 +62,11 @@
         (or
           (found-result tree)
           (recur))))))
+
+(spec-test/instrument)
+
+(defn -main [& args]
+  (time
+    (pprint/pprint
+      (river-crossing-plan
+        [[#{:fox :goose :corn :you} #{:boat} #{}]]))))

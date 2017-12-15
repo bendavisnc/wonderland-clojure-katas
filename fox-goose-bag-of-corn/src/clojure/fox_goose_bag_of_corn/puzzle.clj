@@ -7,7 +7,7 @@
             [fox-goose-bag-of-corn.puzzle.approach.teachers-answer]
             [fox-goose-bag-of-corn.puzzle.approach.queue-solution]
             [orchestra.spec.test :as spec-test]
-            [fox-goose-bag-of-corn.puzzle.specs :as common-specs]))
+            [fox-goose-bag-of-corn.puzzle.specs.puzzle :as puzzle-specs]))
 
 
 ;
@@ -16,43 +16,43 @@
 ;  `(require '[~s :as chosen-solution]))
 
 ;(require
-;  '[fox-goose-bag-of-corn.puzzle.approach.java-solution :as chosen-solution])
+;  '[fox-goose-bag-of-corn.fox-goose-bag-of-corn.puzzle.specs.puzzlee.approach.java-solution :as chosen-solution])
 
 (def ^:dynamic river-crossing-plan* fox-goose-bag-of-corn.puzzle.approach.java-solution/river-crossing-plan)
-;(def ^:dynamic river-crossing-plan* fox-goose-bag-of-corn.puzzle.approach.go-solution/river-crossing-plan)
+;(def ^:dynamic river-crossing-plan* fox-goose-bag-of-corn.fox-goose-bag-of-corn.puzzle.specs.puzzlee.approach.go-solution/river-crossing-plan)
 
 (defmacro with-plan [pfn form]
   `(binding [river-crossing-plan* ~pfn]
     ~form))
 
-;(def ^:dynamic river-crossing-plan* fox-goose-bag-of-corn.puzzle.approach.queue-solution/river-crossing-plan)
+;(def ^:dynamic river-crossing-plan* fox-goose-bag-of-corn.fox-goose-bag-of-corn.puzzle.specs.puzzlee.approach.queue-solution/river-crossing-plan)
 
 (spec/check-asserts true)
 (def start-pos [[[:fox :goose :corn :you] [:boat] []]])
 
 ;(spec/assert common-specs/step-instance-vec (first start-pos))
 
-(spec/assert common-specs/step-instance-vec (first start-pos))
+(spec/assert puzzle-specs/step-instance-vec (first start-pos))
 
-;[fox-goose-bag-of-corn.puzzle.approach.java-solution :as chosen-solution]
-;[fox-goose-bag-of-corn.puzzle.approach.go-solution :as chosen-solution]
+;[fox-goose-bag-of-corn.fox-goose-bag-of-corn.puzzle.specs.puzzlee.approach.java-solution :as chosen-solution]
+;[fox-goose-bag-of-corn.fox-goose-bag-of-corn.puzzle.specs.puzzlee.approach.go-solution :as chosen-solution]
 
 (defn vecs->sets [positions]
   "A vec of vecs of vecs -> a vec of vecs of sets"
   (mapv #(mapv set %) positions))
 
 (spec/fdef vecs->sets
-           :args (spec/cat :positions (spec/coll-of common-specs/step-instance-vec))
+           :args (spec/cat :positions (spec/coll-of puzzle-specs/step-instance-vec))
            ;:args (spec/cat :positions (spec/coll-of double?))
-           :ret (spec/coll-of common-specs/step-instance-set))
+           :ret (spec/coll-of puzzle-specs/step-instance-set))
 
 (defn sets->vecs [positions]
   "A vec of vecs of sets -> a vec of vecs of vecs"
   (mapv #(mapv vec %) positions))
 
 (spec/fdef sets->vecs
-           :args (spec/cat :positions (spec/coll-of common-specs/step-instance-set))
-           :ret (spec/coll-of common-specs/step-instance-vec))
+           :args (spec/cat :positions (spec/coll-of puzzle-specs/step-instance-set))
+           :ret (spec/coll-of puzzle-specs/step-instance-vec))
 
 ;(defn river-crossing-plan []
 ;  start-pos)
@@ -66,7 +66,7 @@
 
 (defn -main [& args]
   (time
-    ;(binding [chosen-solution 'fox-goose-bag-of-corn.puzzle.approach.go-solution]
+    ;(binding [chosen-solution 'fox-goose-bag-of-corn.fox-goose-bag-of-corn.puzzle.specs.puzzlee.approach.go-solution]
       (println
         (clojure.pprint/pprint
           (river-crossing-plan)))))
