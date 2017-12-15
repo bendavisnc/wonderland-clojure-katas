@@ -88,7 +88,10 @@
 
 (spec/fdef found-result
            :args (spec/cat :tree tree-specs/tree)
-           :ret (spec/or :nil nil? :tree tree-specs/tree))
+           :ret (spec/or
+                  :nil nil?
+                  :result puzzle-specs/step-instance-collection-set))
+                  ;:tree tree-specs/tree))
 
 (defn add-branches [tree next-steps]
   (if (empty? next-steps)
@@ -104,47 +107,127 @@
            :ret tree-specs/tree)
 
 
+;(defn next-extended [tree steps]
+;  (->
+;    (update-in
+;      tree
+;      [0 :children]
+;      (fn [e]
+;        (into
+;          (or e [])
+;          steps)))
+;        ;(conj (or e []) steps)))
+;    z/root
+;    mapzipper))
+
+;(defn next-extended [tree steps]
+;  (->
+;    tree
+;    (z/edit
+;      (fn [n]
+;        (update-in
+;          n
+;          [0 :children]
+;          (fn [e]
+;            (into
+;              (or e [])
+;              steps)))))))
+
+
 (defn next-extended [tree steps]
-  (let [ext
-        (-> tree
-          (z/replace
-            (add-branches tree steps)))]
-    (cond
-      (z/end? ext)
-      ext
-      (-> ext z/up z/right)
-      (-> ext z/up z/right)
-      (-> ext z/up)
-      (-> ext z/up)
-      :default
-      ext)))
+  (cond
+    (empty? steps)
+    tree
+    :default
+    (recur
+      (z/insert-child tree (first steps))
+      (rest steps))))
+
+  ;(->
+  ;  tree
+  ;  (z/edit
+  ;    (fn [n]
+  ;      (update-in
+  ;        n
+  ;        [0 :children]
+  ;        (fn [e]
+  ;          (into
+  ;            (or e [])
+  ;            steps)
+
+
+
+  ;(let [ext
+  ;      (-> tree
+  ;        (z/replace
+  ;          (add-branches tree steps)))]
+  ;  (cond
+  ;    (z/end? ext)
+  ;    ext
+  ;    (-> ext z/up z/right)
+  ;    (-> ext z/up z/right)
+  ;    (-> ext z/up)
+  ;    (-> ext z/up)
+  ;    :default
+  ;    ext)))
     ;z/down))
 
 (spec/fdef next-extended
-           :args (spec/cat :tree tree-specs/tree :steps puzzle-specs/step-instance-collection-set)
+           ;:args (spec/cat :tree tree-specs/tree :steps puzzle-specs/step-instance-collection-set)
+           :args (spec/cat :tree tree-specs/tree :steps coll?)
+           :ret tree-specs/tree)
+
+(defn fn-replace [n]
+  {:node-val
+    #(next-extended n (steps/every-possible-next-step (branch->prev-steps n)))})
+
+(defn expand-tree-phase1 [tree]
+  (loop [n tree]
+    (cond
+      (z/end? n)
+      ;(root n)
+      (mapzipper (z/root n))
+      (bottom-branch? n)
+      (recur
+        (-> n
+          (z/replace (fn-replace n))
+          z/next))
+      :default
+      (recur (z/next n)))))
+
+(spec/fdef expand-tree-phase1
+           :args (spec/cat :tree tree-specs/tree)
+           :ret tree-specs/tree)
+
+
+(defn expand-tree-phase2 [tree]
+  (loop [n tree]
+    (cond
+      (z/end? n)
+      ;(root n)
+      (mapzipper (z/root n))
+      (fn? (:node-val (z/node n)))
+      (recur
+        (z/replace
+          n
+          (z/node ((:node-val (z/node n))))))
+      :default
+      (recur (z/next n)))))
+
+(spec/fdef expand-tree-phase2
+           :args (spec/cat :tree tree-specs/tree)
            :ret tree-specs/tree)
 
 
 (defn expand-tree [tree]
-  (loop [n tree]
-    (cond
-      (z/end? n)
-      (root n)
-      ;(z-util/ancestors)
-      (bottom-branch? n)
-      (recur
-        ;(next-extended n (steps/every-possible-next-step (branch->prev-steps n)))
-        ;(next-extended n (steps/every-possible-next-step (spec/assert puzzle-specs/step-instance-collection-set (branch->prev-steps n))))
-        (next-extended n (steps/every-possible-next-step (branch->prev-steps n))))
-      :default
-      (recur (z/next n)))))
+  (expand-tree-phase2
+    (expand-tree-phase1 tree)))
 
 (spec/fdef expand-tree
            :args (spec/cat :tree tree-specs/tree)
            :ret tree-specs/tree)
 
 (defn river-crossing-plan [sp]
-  ;(loop [simple-t (z/vector-zip [sp])])
   (loop [simple-t (mapzipper {:node-val sp})]
     (or
       (found-result simple-t)

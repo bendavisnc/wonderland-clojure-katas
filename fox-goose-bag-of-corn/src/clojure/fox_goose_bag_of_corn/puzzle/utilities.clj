@@ -6,6 +6,38 @@
 (def index {:left-bank 0, :boat 1, :right-bank 2})
 
 
+(defn node-with-children [n children]
+  (update
+    n
+    :children
+    (fn [cs]
+      (mapv
+        (fn [c]
+          (or
+            (when (spec/valid? tree-specs/tree-node c)
+              c)
+            {:node-val c}))
+        children))))
+      ;(or
+      ;  (when (spec/valid? tree-specs/tree-node n)
+      ;    n]
+      ;  {:node-val e})))
+
+
+
+  ;(assoc
+  ;  n
+  ;  :children
+  ;  (mapv
+  ;    (fn [e]
+  ;      {:node-val e})
+  ;      ;(z/make-node n e []))
+  ;    c)))
+  ;    ;#(z/make-node
+  ;    ;   n
+  ;    ;   %)))
+
+
 (defn mapzipper [m]
   (z/zipper
     ; branch
@@ -20,7 +52,8 @@
       (:children n))
     ; make node (zip)
     (fn [n c]
-      (assoc n :children (vec c)))
+      (node-with-children n c))
+    ;(assoc n :children (vec c))
     m))
 
 

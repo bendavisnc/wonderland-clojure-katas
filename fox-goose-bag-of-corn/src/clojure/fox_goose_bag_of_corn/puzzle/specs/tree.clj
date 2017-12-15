@@ -32,5 +32,6 @@
   (spec/tuple
     tree-node?
     (spec/or
+      :end #{:end}
       :nil nil?
       :map map?)))

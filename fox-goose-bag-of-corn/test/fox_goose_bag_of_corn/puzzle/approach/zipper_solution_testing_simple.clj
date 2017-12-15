@@ -33,8 +33,6 @@
           (->
             dummy-tree
             z/down
-            ;z/right
-            ;z/down
             z/node
             :node-val)
           4))
@@ -71,6 +69,34 @@
       (=
         (z/root
           (zt/add-branches dummy-branch [:fruitcup :drink]))
-        {:node-val :a, :children [{:node-val 4, :children [{:node-val "banana"} {:node-val "apple"}]} {:node-val 5, :children [{:node-val "orange"} {:node-val "mango", :children [:drink :fruitcup]}]}]}))))
-        ;7
-;{:node-val :a, :children ({:node-val 4, :children [{:node-val "banana"} {:node-val "apple"}]} {:node-val 5, :children [{:node-val "orange"} {:node-val "mango", :children [:drink :fruitcup]}]})}))))
+        {:node-val :a, :children [{:node-val 4, :children [{:node-val "banana"} {:node-val "apple"}]} {:node-val 5, :children [{:node-val "orange"} {:node-val "mango", :children [{:node-val :drink} {:node-val :fruitcup}]}]}]})))
+
+  (testing "next-extended"
+    (is
+      (=
+        (->
+          (zt/next-extended dummy-branch [:fruitcup :drink])
+          z/root)
+        {:node-val :a,
+         :children [{:node-val 4,
+                     :children [{:node-val "banana"}
+                                {:node-val "apple"}]}
+                    {:node-val 5,
+                     :children [{:node-val "orange"}
+                                {:node-val "mango",
+                                 :children [{:node-val :drink}
+                                            {:node-val :fruitcup}]}]}]}))))
+
+
+
+
+
+
+
+
+
+
+
+
+
+

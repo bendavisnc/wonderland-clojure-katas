@@ -27,5 +27,15 @@
           (->>
             dummy-tree
             zt/branch->prev-steps)
-          [[#{:you :fox :goose :corn} #{:boat} #{}]]))))
+          [[#{:you :fox :goose :corn} #{:boat} #{}]])))
+
+  (testing "expanded-tree"
+    (is (=
+          (->
+            (zt/expand-tree dummy-tree)
+            z/node)
+          {:node-val [#{:you :fox :goose :corn} #{:boat} #{}],
+           :children [{:node-val [#{:fox :corn} #{:you :boat :goose} #{}]}]}))))
+          ;8))))
+          ;[[#{:you :fox :goose :corn} #{:boat} #{}]]))))
 
