@@ -31,4 +31,5 @@
 (defn result-found?
   "Checks if all characters (fox, goose, corn, and you) are safely on the right bank."
   [step]
+  (when (not= 3 (count step)) (throw (new Exception (str step))))
   (= #{:fox :goose :corn :you} (get step (step-key->index :right-bank))))

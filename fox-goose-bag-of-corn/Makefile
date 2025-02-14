@@ -3,4 +3,4 @@ auto:
 
 format:
 	@echo "Formatting clj."
-	zprint -w src/**/*.clj
+	zprint -w src/**/*.clj test/**/*.clj
