@@ -1,51 +1,41 @@
 (ns tiny-maze.solver
-  (:refer-clojure :exclude [update])
   (:require [clojure.pprint :as pprint]
             [clojure.set :refer [difference]])
   (:import (clojure.lang PersistentQueue)))
 
 (def x :x)
-
 (def start :S)
 (def end :E)
 
-(defmulti update
+(defmulti next-maze-steps
   (fn [{:keys [maze position]}]
-    (cond (= start (get-in maze (reverse position)))
-          ::start
-          (= end (get-in maze (reverse position)))
-          ::end)))
+    (cond (= start (get-in maze (reverse position))) ::start
+          (= end (get-in maze (reverse position)))   ::end)))
 
-(defmethod update ::start
+(defmethod next-maze-steps ::start
   [maze-step]
-  [(clojure.core/update maze-step :maze assoc-in [0 0] x)])
+  [(update maze-step :maze assoc-in [0 0] x)])
 
-(defmethod update ::end
+(defmethod next-maze-steps ::end
   [{:keys [position] :as maze-step}]
   [(-> maze-step
-       (clojure.core/update :maze assoc-in (reverse position) x)
+       (update :maze assoc-in (reverse position) x)
        (assoc :last-update ::end))])
 
-(defmethod update :default
+(defmethod next-maze-steps :default
   [{:keys [maze position maze-size] :as maze-step}]
   (let [directions [[-1 0] [1 0] [0 -1] [0 1]]]
     (for [direction directions
-          :let      [position'    [(+ (first position)
-                                      (first direction))
-                                   (+ (second position)
-                                      (second direction))]
+          :let      [position'    [(+ (first position) (first direction))
+                                   (+ (second position) (second direction))]
                      should-mark? (= 0 (get-in maze (reverse position')))
                      at-end?      (= end (get-in maze (reverse position')))]
-          :when     (and
-                     (< (first position') (first maze-size))
-                     (< (second position') (second maze-size))
-                     (or should-mark? at-end?))]
-
+          :when     (and (< (first position') (first maze-size))
+                         (< (second position') (second maze-size))
+                         (or should-mark? at-end?))]
       (-> maze-step
-          (clojure.core/update :maze
-                               (if at-end?
-                                 identity
-                                 #(assoc-in % (reverse position') x)))
+          (update :maze
+                  (if at-end? identity #(assoc-in % (reverse position') x)))
           (assoc :position position')))))
 
 (defn search
@@ -53,8 +43,7 @@
   (loop [queue (into PersistentQueue/EMPTY
                      [[{:position  [0 0]
                         :maze      maze
-                        :maze-size [(count (first maze))
-                                    (count maze)]}]])]
+                        :maze-size [(count (first maze)) (count maze)]}]])]
     (let [maze-steps       (peek queue)
           _ (assert vector? maze-steps)
           _ (assert (seq maze-steps))
@@ -62,13 +51,12 @@
           _ (assert (= (set [:position :maze :maze-size])
                        (difference (set (keys maze-step-latest))
                                    #{:last-update}))
-                    (format "Unexpected `maze-step`, %s."
-                            maze-step-latest))]
+                    (format "Unexpected `maze-step`, %s." maze-step-latest))]
       (if (= ::end (:last-update maze-step-latest))
         maze-steps
         (recur (into (pop queue)
                      (map (partial conj maze-steps)
-                          (update maze-step-latest))))))))
+                          (next-maze-steps maze-step-latest))))))))
 
 
 (defn solve-maze
