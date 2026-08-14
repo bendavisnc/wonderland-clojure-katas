@@ -15,6 +15,10 @@
   [maze position element]
   (assoc-in maze (reverse position) element))
 
+(defn maze-position-within-bounds
+  [& {:keys [maze-size position]}]
+  (every? true? (map < position maze-size)))
+
 ;!zprint {:format :skip}
 (defmulti next-maze-steps
   (fn [{:keys [maze position]}]
@@ -35,17 +39,16 @@
 
 (defmethod next-maze-steps :default
   [{:keys [maze position maze-size] :as maze-step}]
-  (let [directions [[-1 0] [1 0] [0 -1] [0 1]]]
-    (for [direction directions
-          :let      [position'    (add position direction)
-                     should-mark? (= 0 (maze-get maze position'))
-                     at-end?      (= end (maze-get maze position'))]
-          :when     (and (< (first position') (first maze-size))
-                         (< (second position') (second maze-size))
-                         (or should-mark? at-end?))]
-      (-> maze-step
-          (update :maze (if at-end? identity #(maze-set % position' x)))
-          (assoc :position position')))))
+  (flatten (let [directions [[-1 0] [1 0] [0 -1] [0 1]]]
+             (for [direction directions
+                   :let      [position' (add position direction)]
+                   :when     (maze-position-within-bounds :maze-size maze-size
+                                                          :position  position')
+                   :let      [maze-step' (assoc maze-step :position position')]]
+               (condp = (maze-get maze position')
+                 end [maze-step']
+                 0   [(update maze-step' :maze maze-set position' x)]
+                 [])))))
 
 (defn search
   [maze]
