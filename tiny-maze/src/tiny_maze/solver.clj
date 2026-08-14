@@ -7,35 +7,44 @@
 (def start :S)
 (def end :E)
 
+(defn add [a b] (mapv + a b))
+
+(defn maze-get [maze position] (get-in maze (reverse position)))
+
+(defn maze-set
+  [maze position element]
+  (assoc-in maze (reverse position) element))
+
+;!zprint {:format :skip}
 (defmulti next-maze-steps
   (fn [{:keys [maze position]}]
-    (cond (= start (get-in maze (reverse position))) ::start
-          (= end (get-in maze (reverse position)))   ::end)))
+    (condp = (maze-get maze position)
+      start ::start
+      end   ::end
+      x     :default)))
 
 (defmethod next-maze-steps ::start
   [maze-step]
-  [(update maze-step :maze assoc-in [0 0] x)])
+  [(update maze-step :maze maze-set [0 0] x)])
 
 (defmethod next-maze-steps ::end
   [{:keys [position] :as maze-step}]
   [(-> maze-step
-       (update :maze assoc-in (reverse position) x)
+       (update :maze maze-set position x)
        (assoc :last-update ::end))])
 
 (defmethod next-maze-steps :default
   [{:keys [maze position maze-size] :as maze-step}]
   (let [directions [[-1 0] [1 0] [0 -1] [0 1]]]
     (for [direction directions
-          :let      [position'    [(+ (first position) (first direction))
-                                   (+ (second position) (second direction))]
-                     should-mark? (= 0 (get-in maze (reverse position')))
-                     at-end?      (= end (get-in maze (reverse position')))]
+          :let      [position'    (add position direction)
+                     should-mark? (= 0 (maze-get maze position'))
+                     at-end?      (= end (maze-get maze position'))]
           :when     (and (< (first position') (first maze-size))
                          (< (second position') (second maze-size))
                          (or should-mark? at-end?))]
       (-> maze-step
-          (update :maze
-                  (if at-end? identity #(assoc-in % (reverse position') x)))
+          (update :maze (if at-end? identity #(maze-set % position' x)))
           (assoc :position position')))))
 
 (defn search
