@@ -23,23 +23,19 @@
             {}
             (for [c alphabet-chars c2 alphabet-chars] [c c2]))))
 
+(defn encode-decode
+  [keyword message invert?]
+  (let [invert #(if invert? (clojure.set/map-invert %) %)]
+    (string/join (map #(-> alphabet-cipher-chart
+                           (get %1)
+                           invert
+                           (get %2))
+                      (cycle (char-array keyword))
+                      (char-array message)))))
 
-(defn encode
-  [keyword message]
-  (string/join (map #(-> alphabet-cipher-chart
-                         (get %1)
-                         (get %2))
-                    (cycle (char-array keyword))
-                    (char-array message))))
+(defn encode [keyword message] (encode-decode keyword message false))
 
-(defn decode
-  [keyword message]
-  (string/join (map #(-> alphabet-cipher-chart
-                         (get %1)
-                         clojure.set/map-invert
-                         (get %2))
-                    (cycle (char-array keyword))
-                    (char-array message))))
+(defn decode [keyword message] (encode-decode keyword message true))
 
 (defn repeating-substring
   [s]
