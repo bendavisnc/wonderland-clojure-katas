@@ -1,11 +1,56 @@
-(ns alphabet-cipher.coder)
+(ns alphabet-cipher.coder
+  (:require [clojure.pprint :as pprint]
+            [clojure.string :as string]))
 
-(defn encode [keyword message]
-  "encodeme")
+(defn alphabet-cipher-chart-next-row
+  [row]
+  (vec (concat (rest row) [(first row)])))
 
-(defn decode [keyword message]
-  "decodeme")
+(defn char->index [c] (- (int c) (int \a)))
 
-(defn decipher [cipher message]
-  "decypherme")
+(def alphabet-cipher-chart
+  (let [alphabet-chars (vec (map char (range (int \a) (inc (int \z)))))
+        character-grid (vec (take (count alphabet-chars)
+                                  (iterate alphabet-cipher-chart-next-row
+                                           alphabet-chars)))]
+    (reduce (fn [acc k]
+              (let [[column-char row-char] k]
+                (assoc-in acc
+                 [column-char row-char]
+                 (-> character-grid
+                     (get (char->index column-char))
+                     (get (char->index row-char))))))
+            {}
+            (for [c alphabet-chars c2 alphabet-chars] [c c2]))))
 
+
+(defn encode
+  [keyword message]
+  (string/join (map #(-> alphabet-cipher-chart
+                         (get %1)
+                         (get %2))
+                    (cycle (char-array keyword))
+                    (char-array message))))
+
+(defn decode
+  [keyword message]
+  (string/join (map #(-> alphabet-cipher-chart
+                         (get %1)
+                         clojure.set/map-invert
+                         (get %2))
+                    (cycle (char-array keyword))
+                    (char-array message))))
+
+(defn repeating-substring
+  [s]
+  (loop [i 0]
+    (assert (< i (count s)))
+    (let [sub (subs s 0 i)]
+      (if (= (string/join (take (count s) (cycle sub))) s)
+        sub
+        (recur (inc i))))))
+
+(defn decipher
+  [cipher message]
+  (let [cipher-repeating (decode message cipher)]
+    (repeating-substring cipher-repeating)))
