@@ -8,7 +8,10 @@
 
 (defn char->index [c] (- (int c) (int \a)))
 
-(def alphabet-cipher-chart
+(def
+  ^{:doc
+    "A map of maps where `((thismap b) a) returns the character in the substitution chart according to the row index derived by `b` and the column index derived by `a`."}
+  alphabet-cipher-chart
   (let [alphabet-chars (vec (map char (range (int \a) (inc (int \z)))))
         character-grid (vec (take (count alphabet-chars)
                                   (iterate alphabet-cipher-chart-next-row
@@ -24,8 +27,11 @@
             (for [c alphabet-chars c2 alphabet-chars] [c c2]))))
 
 (defn encode-decode
+  "Applies `alphabet-cipher-chart` to build a new string.
+   Characters from index n are taken from `keyword` and `message` as input.
+   `invert` is used for decoding so that the value for the secondary map becomes the key."
   [keyword message invert?]
-  (let [invert #(if invert? (clojure.set/map-invert %) %)]
+  (let [invert (if invert? clojure.set/map-invert identity)]
     (string/join (map #(-> alphabet-cipher-chart
                            (get %1)
                            invert
@@ -33,11 +39,11 @@
                       (cycle (char-array keyword))
                       (char-array message)))))
 
-(defn encode [keyword message] (encode-decode keyword message false))
-
-(defn decode [keyword message] (encode-decode keyword message true))
-
 (defn repeating-substring
+  "Examines the first character of s, and then the first two, etc until repeating that substring and combining it is equal to `s`.
+   Example:
+   (repeating-substring \"bananabananabananabanan\")
+   \"banana\")"
   [s]
   (loop [i 0]
     (assert (< i (count s)))
@@ -45,6 +51,10 @@
       (if (= (string/join (take (count s) (cycle sub))) s)
         sub
         (recur (inc i))))))
+
+(defn encode [keyword message] (encode-decode keyword message false))
+
+(defn decode [keyword message] (encode-decode keyword message true))
 
 (defn decipher
   [cipher message]
