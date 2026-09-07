@@ -7,24 +7,58 @@
   (testing "the highest rank wins the cards in the round"
     (is (= (last cards) (play-round (first cards) (last cards)))))
   (testing "queens are higher rank than jacks"
-    (is (= [:heart :queen] (play-round [:heart :queen] [:heart :jack]))))
+    (is (= [:queen :heart] (play-round [:queen :heart] [:jack :heart]))))
   (testing "kings are higher rank than queens"
-    (is (= [:heart :king] (play-round [:heart :king] [:heart :queen]))))
+    (is (= [:king :heart] (play-round [:king :heart] [:queen :heart]))))
   (testing "aces are higher rank than kings"
-    (is (= [:heart :ace] (play-round [:heart :ace] [:heart :king])))))
+    (is (= [:ace :heart] (play-round [:ace :heart] [:king :heart])))))
+
+(deftest test-play-game-hands-are-mirrored
+  (testing
+    "the player loses when they run out of cards, unless card hands are mirrored"
+    (let [[player-one-cards player-two-cards] (reduce
+                                               (fn [[cards-a cards-b] [i card]]
+                                                 (if (odd? i)
+                                                   [(conj cards-a card)
+                                                    cards-b]
+                                                   [cards-a
+                                                    (conj cards-b card)]))
+                                               [[] []]
+                                               (map-indexed vector cards))
+          _ (assert (= [26 26]
+                       [(count player-one-cards) (count player-two-cards)]))
+          card-hands      {player-one (vec player-one-cards)
+                           player-two (vec player-two-cards)
+                           discard    []}
+          [card-hands' _] ((play-game (draw-cards)) card-hands)]
+      (is (= 0 (count (player-one card-hands'))))
+      (is (= 0 (count (player-two card-hands'))))
+      (is (= 52 (count (discard card-hands')))))))
+
 
 (deftest test-play-game
-  (testing "the player loses when they run out of cards"
-    (let [[player1-cards player2-cards] (reduce
-                                         (fn [[cards-a cards-b] [i card]]
-                                           (if (odd? i)
-                                             [(conj cards-a card) cards-b]
-                                             [cards-a (conj cards-b card)]))
-                                         [[] []]
-                                         (map-indexed vector cards))
-          _ (assert (= [26 26] [(count player1-cards) (count player2-cards)]))
-          game-result (play-game player1-cards player2-cards)]
-      ;; _ (prn game-result)]
-      (is (= 52 (count (:player-one (:cards game-result)))))
-      (is (= 0 (count (:player-two (:cards game-result)))))
-      (is (= :player-one (:winner game-result))))))
+  (testing
+    "the player loses when they run out of cards"
+    (let [[cards-a cards-b] (reduce (fn [[cards-a cards-b] [i card]]
+                                      (if (odd? i)
+                                        [(conj cards-a
+                                               card)
+                                         cards-b]
+                                        [cards-a
+                                         (conj cards-b card)]))
+                                    [[] []]
+                                    (map-indexed vector cards))
+          player-one-cards  (vec (concat [(last cards-b)] cards-a))
+          player-two-cards  (vec (drop-last cards-b))
+          _ (assert (= [27 25]
+                       [(count player-one-cards)
+                        (count
+                         player-two-cards)]))
+          card-hands        {player-one player-one-cards
+                             player-two player-two-cards
+                             discard    []}
+          [card-hands' _]   ((play-game (draw-cards)) card-hands)]
+      (is (= 0 (count (player-one card-hands'))))
+      (is (= 52 (count (player-two card-hands'))))
+      (is (= 0 (count (discard card-hands')))))))
+
