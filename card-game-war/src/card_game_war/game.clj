@@ -181,7 +181,7 @@
   (fn [s]
     (loop [s' s
            i  0]
-      (cond (>= i 1000)     (throw (ex-info "Maximum game hands exceeded."
+      (cond (>= i 10000)    (throw (ex-info "Maximum game hands exceeded."
                                             {:hands i}))
             (game-over? s') [s' nil]
             :else           (let [[s'' result] ((play-battle-with-war-fallback

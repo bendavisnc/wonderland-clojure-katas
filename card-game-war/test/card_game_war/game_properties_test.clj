@@ -20,7 +20,7 @@
 
 
 (defspec no-cards-missing
-         100
+         1000
          (prop/for-all [card-hands gen-card-hands]
                        (let [[card-hands _] ((play-game (draw-cards))
                                              card-hands)]
@@ -35,7 +35,7 @@
 
 
 (defspec one-player-no-cards
-         100
+         1000
          (prop/for-all
           [card-hands gen-card-hands]
           (let [[card-hands _]   ((play-game (draw-cards)) card-hands)
@@ -47,4 +47,20 @@
             ;; After the game, one player should be out of cards.
             (= 1 (count players-no-cards)))))
 
+(alter-var-root
+ #'clojure.test.check.clojure-test/assert-check
+ (constantly
+  (fn [{:keys [result result-data] :as m}]
+    (if-let [error (:clojure.test.check.properties/error result-data)]
+      (clojure.test/do-report
+       {:type     :error
+        :message  (-> m
+                      (dissoc :result :result-data)
+                      (update :shrunk dissoc :result)
+                      (update-in [:shrunk :result-data]
+                                 dissoc
+                                 :clojure.test.check.properties/error))
+        :expected {:result true}
+        :actual   error})
+      (clojure.test/is (clojure.test.check.clojure-test/check? m))))))
 
