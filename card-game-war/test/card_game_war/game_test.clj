@@ -16,15 +16,13 @@
 (deftest test-play-game-hands-are-mirrored
   (testing
     "the player loses when they run out of cards, unless card hands are mirrored"
-    (let [[player-one-cards player-two-cards] (reduce
-                                               (fn [[cards-a cards-b] [i card]]
-                                                 (if (odd? i)
-                                                   [(conj cards-a card)
-                                                    cards-b]
-                                                   [cards-a
-                                                    (conj cards-b card)]))
-                                               [[] []]
-                                               (map-indexed vector cards))
+    (let [[player-one-cards player-two-cards]
+          (reduce (fn [[cards-a cards-b] [i card]]
+                    (if (odd? i)
+                      [(conj cards-a card) cards-b]
+                      [cards-a (conj cards-b card)]))
+                  [[] []]
+                  (map-indexed vector cards))
           _ (assert (= [26 26]
                        [(count player-one-cards) (count player-two-cards)]))
           card-hands      {player-one (vec player-one-cards)
@@ -37,23 +35,17 @@
 
 
 (deftest test-play-game
-  (testing
-    "the player loses when they run out of cards"
+  (testing "the player loses when they run out of cards"
     (let [[cards-a cards-b] (reduce (fn [[cards-a cards-b] [i card]]
                                       (if (odd? i)
-                                        [(conj cards-a
-                                               card)
-                                         cards-b]
-                                        [cards-a
-                                         (conj cards-b card)]))
+                                        [(conj cards-a card) cards-b]
+                                        [cards-a (conj cards-b card)]))
                                     [[] []]
                                     (map-indexed vector cards))
           player-one-cards  (vec (concat [(last cards-b)] cards-a))
           player-two-cards  (vec (drop-last cards-b))
           _ (assert (= [27 25]
-                       [(count player-one-cards)
-                        (count
-                         player-two-cards)]))
+                       [(count player-one-cards) (count player-two-cards)]))
           card-hands        {player-one player-one-cards
                              player-two player-two-cards
                              discard    []}
