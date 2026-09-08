@@ -28,6 +28,30 @@
   (fn [s]
     [(f s) nil]))
 
+(defn flatmap
+  [state-fn state-fn-fn]
+  (fn [s]
+    (let [[s' a] (state-fn s)]
+      ((state-fn-fn a)
+       s'))))
+
+(defn fmap
+  [state-fn f]
+  (flatmap state-fn
+           (fn [a]
+             (pure (f a)))))
+
+(defn state-fns-sequence
+  [& state-fns]
+  (reduce (fn [state-fn-a state-fn-b]
+            (flatmap state-fn-a
+                     (fn [a]
+                       (flatmap state-fn-b
+                                (fn [b]
+                                  (pure (conj a b)))))))
+          (pure [])
+          state-fns))
+
 (defn game-over?
   [s]
   (or (empty? (get s player-one))
@@ -44,31 +68,18 @@
 
 (defn draw-cards
   []
-  (fn [s]
-    (let [[s2 card-a] ((draw-card player-one) s)
-          [s3 card-b] ((draw-card player-two) s2)]
-      [s3 [card-a card-b]])))
+  (state-fns-sequence (draw-card player-one) (draw-card player-two)))
 
 (defn draw-cards-for-war
   []
-  (let [draw-for-player
-        (fn [player]
-          (fn [s]
-            (loop [s'  s
-                   acc []
-                   i   0]
-              (if (= i war-cards-count)
-                [s' acc]
-                (let [[s'' card] ((draw-card player) s')]
-                  (recur s''
-                         (if card
-                           (conj acc card)
-                           acc)
-                         (inc i)))))))]
-    (fn [s]
-      (let [[s' cards-a]  ((draw-for-player player-one) s)
-            [s'' cards-b] ((draw-for-player player-two) s')]
-        [s'' [cards-a cards-b]]))))
+  (let [draw-for-player (fn [player]
+                          (fmap (apply state-fns-sequence
+                                       (map draw-card
+                                            (repeat war-cards-count player)))
+                                #(filterv seq %)))]
+    (->> [player-one player-two]
+         (map draw-for-player)
+         (apply state-fns-sequence))))
 
 (defn draw-discard-pile
   []
@@ -125,15 +136,14 @@
                                  winning-cards
                                  losing-cards)
 
-          s3     (reduce
-                  (fn [state card]
-                    (first
-                     ((add-card
-                       :card-designee (or player discard)
-                       :card card)
-                      state)))
-                  s2
-                  cards-to-award)
+          s3     (first
+                  ((apply state-fns-sequence
+                          (map (fn [card]
+                                 (add-card
+                                  :card-designee (or player discard)
+                                  :card card))
+                               cards-to-award))
+                   s2))
 
           result (cond (and player (seq winning-cards))
                        (winner player (last winning-cards))
@@ -291,3 +301,73 @@
           (if (game-over? s'')
             [s'' result]
             (recur s'' (inc i))))))))
+
+(comment
+  (let [a (pure 1)
+        b (pure 2)
+        c (pure 3)
+        d (state-fns-sequence a b c)]
+    (d nil)))
+
+(comment
+  ((draw-cards-for-war)
+   {player-one [[1 :heart] [2 :heart] [3 :heart] [4 :heart] [5 :heart]
+                [6 :heart]]
+    player-two [[1 :diamond] [2 :diamond] [3 :diamond] [4 :diamond] [5 :diamond]
+                [6 :diamond]]}))
+
+(defn draw-cards-for-war-old
+  []
+  (let [draw-for-player
+        (fn [player]
+          (fn [s]
+            (loop [s'  s
+                   acc []
+                   i   0]
+              (if (= i war-cards-count)
+                [s' acc]
+                (let [[s'' card] ((draw-card player) s')]
+                  (recur s''
+                         (if card
+                           (conj acc card)
+                           acc)
+                         (inc i)))))))]
+    (fn [s]
+      (let [[s' cards-a]  ((draw-for-player player-one) s)
+            [s'' cards-b] ((draw-for-player player-two) s')]
+        [s'' [cards-a cards-b]]))))
+
+
+(comment
+  ((draw-cards-for-war-old)
+   {player-one [[1 :heart] [2 :heart] [3 :heart]]
+    player-two [[1 :diamond] [2 :diamond] [3 :diamond]]}))
+
+(comment
+  ((draw-cards-for-war)
+   {player-one [[1 :heart] [2 :heart] [3 :heart]]
+    player-two [[1 :diamond] [2 :diamond] [3 :diamond]]}))
+
+
+
+
+
+
+(comment
+  (=
+
+   ((draw-cards-for-war)
+    {player-one [[1 :heart] [2 :heart] [3 :heart] [4 :heart] [5 :heart]
+                 [6 :heart]]
+     player-two [[1 :diamond] [2 :diamond] [3 :diamond] [4 :diamond]
+                 [5 :diamond]
+                 [6 :diamond]]})
+
+
+   ((draw-cards-for-war-old)
+    {player-one [[1 :heart] [2 :heart] [3 :heart] [4 :heart] [5 :heart]
+                 [6 :heart]]
+     player-two [[1 :diamond] [2 :diamond] [3 :diamond] [4 :diamond]
+                 [5 :diamond]
+                 [6 :diamond]]})))
+
