@@ -130,77 +130,57 @@
            losing-cards
            tie-result
            winner]}]
-  (fn [s]
-    (let [[s2 discarded] ((draw-discard-pile) s)
-          cards-to-award (concat discarded
-                                 winning-cards
-                                 losing-cards)
+  (flatmap
+   (draw-discard-pile)
+   (fn [discarded]
+     (let [cards-to-award (concat discarded winning-cards losing-cards)]
+       (fmap (apply state-fns-sequence
+                    (map (fn [card]
+                           (add-card :card-designee (or player discard)
+                                     :card card))
+                         cards-to-award))
+             (fn [_]
+               (cond (and player (seq winning-cards))
+                     (winner player (last winning-cards))
 
-          s3     (first
-                  ((apply state-fns-sequence
-                          (map (fn [card]
-                                 (add-card
-                                  :card-designee (or player discard)
-                                  :card card))
-                               cards-to-award))
-                   s2))
+                     (nil? player)
+                     tie-result
 
-          result (cond (and player (seq winning-cards))
-                       (winner player (last winning-cards))
-
-                       (nil? player)
-                       tie-result
-
-                       :else
-                       (throw
-                        (ex-info
-                         "Cannot determine winner."
-                         {:player        player
-                          :winning-cards winning-cards
-                          :losing-cards  losing-cards})))]
-      [s3 result])))
+                     :else (throw (ex-info "Cannot determine winner."
+                                           {:player player
+                                            :winning-cards winning-cards
+                                            :losing-cards losing-cards})))))))))
 
 (defn battle-winner
   [& {:keys [player winning-card losing-card]}]
-  (award-cards
-   :player player
-   :winning-cards (if winning-card [winning-card] [])
-   :losing-cards (if losing-card [losing-card] [])
-   :tie-result ::war
-   :winner
-   (fn [player card]
-     {::battle-winner
-      {:player       player
-       :winning-card card}})))
+  (award-cards :player player
+               :winning-cards (if winning-card [winning-card] [])
+               :losing-cards (if losing-card [losing-card] [])
+               :tie-result ::war
+               :winner
+               (fn [player card]
+                 {::battle-winner {:player       player
+                                   :winning-card card}})))
 
 (defn play-battle
   [gamestate]
-  (fn [s]
-    (let [[s2 [card-a card-b]] (gamestate s)]
-      (case (compare-cards
-             (if card-a [card-a] [])
-             (if card-b [card-b] []))
+  (flatmap gamestate
+           (fn [[card-a card-b]]
+             (case (compare-cards (if card-a [card-a] [])
+                                  (if card-b [card-b] []))
 
-        ::player-one
-        ((battle-winner
-          :player       player-one
-          :winning-card card-a
-          :losing-card  card-b)
-         s2)
+               ::player-one (battle-winner :player       player-one
+                                           :winning-card card-a
+                                           :losing-card  card-b)
 
-        ::player-two
-        ((battle-winner
-          :player       player-two
-          :winning-card card-b
-          :losing-card  card-a)
-         s2)
+               ::player-two (battle-winner :player       player-two
+                                           :winning-card card-b
+                                           :losing-card  card-a)
 
-        ;; Tie
-        ((battle-winner
-          :player       nil
-          :winning-card card-b
-          :losing-card  card-a)
-         s2)))))
+               ;; Tie
+               (battle-winner :player       nil
+                              :winning-card card-b
+                              :losing-card  card-a)))))
 
 (defn war-winner
   [& {:keys [player winning-cards losing-cards]}]
@@ -217,49 +197,35 @@
 
 (defn play-war
   [gamestate]
-  (fn [s]
-    (let [[s2 [player-one-cards player-two-cards]]
-          (gamestate s)]
-      (case (compare-cards player-one-cards player-two-cards)
+  (flatmap gamestate
+           (fn [[player-one-cards player-two-cards]]
+             (case (compare-cards player-one-cards player-two-cards)
 
-        ::player-one
-        ((war-winner
-          :player        player-one
-          :winning-cards player-one-cards
-          :losing-cards  player-two-cards)
-         s2)
+               ::player-one (war-winner :player        player-one
+                                        :winning-cards player-one-cards
+                                        :losing-cards  player-two-cards)
 
-        ::player-two
-        ((war-winner
-          :player        player-two
-          :winning-cards player-two-cards
-          :losing-cards  player-one-cards)
-         s2)
+               ::player-two (war-winner :player        player-two
+                                        :winning-cards player-two-cards
+                                        :losing-cards  player-one-cards)
 
-        ;; Tie
-        ((war-winner
-          :player        nil
-          :winning-cards player-two-cards
-          :losing-cards  player-one-cards)
-         s2)))))
+               ;; Tie
+               (war-winner :player        nil
+                           :winning-cards player-two-cards
+                           :losing-cards  player-one-cards)))))
 
 (defn play-battle-with-war-fallback
   [gamestate]
-  (fn [s]
-    (let [[s2 battle-result]
-          ((play-battle gamestate) s)]
-      (cond
-        (::battle-winner battle-result)
-        [s2 battle-result]
+  (flatmap (play-battle gamestate)
+           (fn [battle-result]
+             (cond (::battle-winner battle-result)
+                   (pure battle-result)
 
-        (= battle-result ::war)
-        ((play-war (draw-cards-for-war)) s2)
+                   (= battle-result ::war) (play-war (draw-cards-for-war))
 
-        :else
-        (throw
-         (ex-info
-          "Unexpected battle result."
-          {:result battle-result}))))))
+                   :else
+                   (throw (ex-info "Unexpected battle result."
+                                   {:result battle-result}))))))
 
 
 (defn play-round
@@ -285,89 +251,14 @@
   (fn [s]
     (loop [s' s
            i  0]
-      (cond
-        (>= i 1000)
-        (throw
-         (ex-info
-          "Maximum game hands exceeded."
-          {:hands i}))
+      (cond (>= i 1000)     (throw (ex-info "Maximum game hands exceeded."
+                                            {:hands i}))
 
-        (game-over? s')
-        [s' nil]
+            (game-over? s') [s' nil]
 
-        :else
-        (let [[s'' result]
-              ((play-battle-with-war-fallback gamestate) s')]
-          (if (game-over? s'')
-            [s'' result]
-            (recur s'' (inc i))))))))
-
-(comment
-  (let [a (pure 1)
-        b (pure 2)
-        c (pure 3)
-        d (state-fns-sequence a b c)]
-    (d nil)))
-
-(comment
-  ((draw-cards-for-war)
-   {player-one [[1 :heart] [2 :heart] [3 :heart] [4 :heart] [5 :heart]
-                [6 :heart]]
-    player-two [[1 :diamond] [2 :diamond] [3 :diamond] [4 :diamond] [5 :diamond]
-                [6 :diamond]]}))
-
-(defn draw-cards-for-war-old
-  []
-  (let [draw-for-player
-        (fn [player]
-          (fn [s]
-            (loop [s'  s
-                   acc []
-                   i   0]
-              (if (= i war-cards-count)
-                [s' acc]
-                (let [[s'' card] ((draw-card player) s')]
-                  (recur s''
-                         (if card
-                           (conj acc card)
-                           acc)
-                         (inc i)))))))]
-    (fn [s]
-      (let [[s' cards-a]  ((draw-for-player player-one) s)
-            [s'' cards-b] ((draw-for-player player-two) s')]
-        [s'' [cards-a cards-b]]))))
-
-
-(comment
-  ((draw-cards-for-war-old)
-   {player-one [[1 :heart] [2 :heart] [3 :heart]]
-    player-two [[1 :diamond] [2 :diamond] [3 :diamond]]}))
-
-(comment
-  ((draw-cards-for-war)
-   {player-one [[1 :heart] [2 :heart] [3 :heart]]
-    player-two [[1 :diamond] [2 :diamond] [3 :diamond]]}))
-
-
-
-
-
-
-(comment
-  (=
-
-   ((draw-cards-for-war)
-    {player-one [[1 :heart] [2 :heart] [3 :heart] [4 :heart] [5 :heart]
-                 [6 :heart]]
-     player-two [[1 :diamond] [2 :diamond] [3 :diamond] [4 :diamond]
-                 [5 :diamond]
-                 [6 :diamond]]})
-
-
-   ((draw-cards-for-war-old)
-    {player-one [[1 :heart] [2 :heart] [3 :heart] [4 :heart] [5 :heart]
-                 [6 :heart]]
-     player-two [[1 :diamond] [2 :diamond] [3 :diamond] [4 :diamond]
-                 [5 :diamond]
-                 [6 :diamond]]})))
-
+            :else           (let [[s'' result]
+                                  ((play-battle-with-war-fallback gamestate)
+                                   s')]
+                              (if (game-over? s'')
+                                [s'' result]
+                                (recur s'' (inc i))))))))
