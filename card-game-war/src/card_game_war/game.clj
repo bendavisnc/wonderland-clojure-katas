@@ -1,4 +1,7 @@
-(ns card-game-war.game)
+(ns card-game-war.game
+  "Treats a map of cards as game state where cards can belong to one of two player keys or a discard key.
+   State operations are organized into 4 functions that are built on top of one another.
+   See `play-battle`, `play-war`, `play-battle-with-war-fallback` and `play-game`.")
 
 (def suits [:spade :club :diamond :heart])
 
@@ -64,9 +67,9 @@
 
 (defn add-card
   [& {:keys [card-designee card]}]
-  (fn [s]
-    (assert (vector? (get s card-designee)) (str [card-designee card s]))
-    (let [s2 (update s card-designee (fnil conj []) card)] [s2 nil])))
+  (modify (fn [s]
+            (assert (vector? (get s card-designee)))
+            (update s card-designee (fnil conj []) card))))
 
 (defn compare-cards
   [player-one-cards player-two-cards]
@@ -114,6 +117,7 @@
                                                   :winning-card card}})))
 
 (defn play-battle
+  "A game state function that either returns a winning result and a new state with cards awarded to the winner or a `::war` result with played cards moved to the discard hand."
   [gamestate]
   (flatmap
    gamestate
@@ -139,9 +143,17 @@
                                                :winning-cards cards}})))
 
 (defn play-war
+  "A game state function similar to `play-battle` but expects 4 cards instead of 1 from each player.
+   One player can have less than 4 cards if there's less than 4 in their whole deck.
+   Also both players can have no cards if it's the corner case where a game is a draw."
   [gamestate]
   (flatmap gamestate
            (fn [[player-one-cards player-two-cards]]
+             (let [card-counts (mapv count [player-one-cards player-two-cards])
+                   one-player-has-all-cards? (some #(= war-cards-count %)
+                                                   card-counts)
+                   no-player-has-all-cards? (= [0 0] card-counts)]
+               (assert (or one-player-has-all-cards? no-player-has-all-cards?)))
              (case (compare-cards player-one-cards player-two-cards)
                ::player-one (war-winner :player        player-one
                                         :winning-cards player-one-cards
@@ -155,6 +167,7 @@
                            :losing-cards  player-one-cards)))))
 
 (defn play-battle-with-war-fallback
+  "A game state function that returns either the winning result from `play-battle` or the result from `play-war`."
   [gamestate]
   (flatmap
    (play-battle gamestate)
@@ -165,8 +178,9 @@
                                                    "Unexpected battle result."
                                                    {:result battle-result}))))))
 
-
 (defn play-round
+  "Wraps `play-battle` and returns the winning card or throws an error.
+   For testing only."
   [card-a card-b]
   (let [[_ result] ((play-battle (pure [card-a card-b]))
                     {player-one [] player-two [] discard []})]
@@ -177,6 +191,8 @@
       (throw (ex-info "Cards are equal." {:card-a card-a :card-b card-b})))))
 
 (defn play-game
+  "A game state function that continually invokes `play-battle-with-war-fallback` until game over game state is reached. 
+   Fails after 10000 rounds."
   [gamestate]
   (fn [s]
     (loop [s' s
