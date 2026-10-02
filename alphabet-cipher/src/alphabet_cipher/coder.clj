@@ -10,21 +10,17 @@
 
 (def
   ^{:doc
-    "A map of maps where `((thismap b) a) returns the character in the substitution chart according to the row index derived by `b` and the column index derived by `a`."}
+    "A map of maps where `((thismap b) a) returns the character in the
+    substitution chart according to the row index derived by `b` and the
+    column
+    index derived by `a`."}
   alphabet-cipher-chart
-  (let [alphabet-chars (vec (map char (range (int \a) (inc (int \z)))))
-        character-grid (vec (take (count alphabet-chars)
-                                  (iterate alphabet-cipher-chart-next-row
-                                           alphabet-chars)))]
-    (reduce (fn [acc k]
-              (let [[column-char row-char] k]
-                (assoc-in acc
-                 [column-char row-char]
-                 (-> character-grid
-                     (get (char->index column-char))
-                     (get (char->index row-char))))))
-            {}
-            (for [c alphabet-chars c2 alphabet-chars] [c c2]))))
+  (let [alphabet (mapv char (range (int \a) (inc (int \z))))]
+    (->> alphabet
+         (iterate alphabet-cipher-chart-next-row)
+         (take (count alphabet))
+         (map #(zipmap alphabet %))
+         (zipmap alphabet))))
 
 (defn encode-decode
   "Applies `alphabet-cipher-chart` to build a new string.
