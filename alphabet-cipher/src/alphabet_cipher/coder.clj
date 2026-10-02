@@ -41,12 +41,10 @@
    (repeating-substring \"bananabananabananabanan\")
    \"banana\")"
   [s]
-  (loop [i 0]
-    (assert (< i (count s)))
-    (let [sub (subs s 0 i)]
-      (if (= (string/join (take (count s) (cycle sub))) s)
-        sub
-        (recur (inc i))))))
+  (some #(let [sub (subs s 0 %)]
+            (when (= (string/join (take (count s) (cycle sub))) s)
+              sub))
+        (range 1 (inc (count s)))))
 
 (defn encode [keyword message] (encode-decode keyword message false))
 
