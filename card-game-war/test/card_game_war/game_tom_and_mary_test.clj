@@ -6,7 +6,7 @@
   (testing "turn one"
     (let [toms-cards  [[4 :club]]
           marys-cards [[8 :spade]]
-          card-hands  {player-one toms-cards player-two marys-cards}
+          card-hands  {player-one toms-cards, player-two marys-cards}
           [card-hands' {:keys [card-game-war.game/battle-winner]}]
           ((play-game (draw-cards)) card-hands)]
       (is (= player-two (:player battle-winner)))
@@ -20,7 +20,7 @@
   (testing "turn two"
     (let [toms-cards  [[:ace :spade]]
           marys-cards [[:king :spade]]
-          card-hands  {player-one toms-cards player-two marys-cards}
+          card-hands  {player-one toms-cards, player-two marys-cards}
           [card-hands' {:keys [card-game-war.game/battle-winner]}]
           ((play-game (draw-cards)) card-hands)]
       (is (= player-one (:player battle-winner)))
@@ -36,7 +36,7 @@
                            [8 :diamond]]
           marys-cards     [[6 :diamond] [2 :diamond] [3 :diamond] [4 :diamond]
                            [9 :heart]]
-          card-hands      {player-one toms-cards player-two marys-cards}
+          card-hands      {player-one toms-cards, player-two marys-cards}
           [card-hands' _] ((play-game (draw-cards)) card-hands)]
       (is (= 0 (count (player-one card-hands'))))
       (is (= (+ (count toms-cards) (count marys-cards))

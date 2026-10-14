@@ -42,8 +42,8 @@
    \"banana\")"
   [s]
   (some #(let [sub (subs s 0 %)]
-            (when (= (string/join (take (count s) (cycle sub))) s)
-              sub))
+           (when (= (string/join (take (count s) (cycle sub))) s)
+             sub))
         (range 1 (inc (count s)))))
 
 (defn encode [keyword message] (encode-decode keyword message false))

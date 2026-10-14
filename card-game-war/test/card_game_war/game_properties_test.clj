@@ -15,7 +15,7 @@
                         (gen/choose 0 (dec (count acc)))))))
 
 (def gen-card-hands
-  (gen/fmap (fn [[cards-a cards-b]] {player-one cards-a player-two cards-b})
+  (gen/fmap (fn [[cards-a cards-b]] {player-one cards-a, player-two cards-b})
             (shuffle-and-split-gen cards)))
 
 
@@ -50,17 +50,17 @@
 (alter-var-root
  #'clojure.test.check.clojure-test/assert-check
  (constantly
-  (fn [{:keys [result result-data] :as m}]
+  (fn [{:keys [result result-data], :as m}]
     (if-let [error (:clojure.test.check.properties/error result-data)]
       (clojure.test/do-report
-       {:type     :error
+       {:type     :error,
         :message  (-> m
                       (dissoc :result :result-data)
                       (update :shrunk dissoc :result)
                       (update-in [:shrunk :result-data]
                                  dissoc
-                                 :clojure.test.check.properties/error))
-        :expected {:result true}
+                                 :clojure.test.check.properties/error)),
+        :expected {:result true},
         :actual   error})
       (clojure.test/is (clojure.test.check.clojure-test/check? m))))))
 

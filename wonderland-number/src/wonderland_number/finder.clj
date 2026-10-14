@@ -4,10 +4,10 @@
 (defn is-wonderland-number?
   [n]
   (let [products (for [factor (range 2 7)
-                       :let [product (* n factor)
-                             product-digits (set (str product))]]
+                       :let   [product        (* n factor)
+                               product-digits (set (str product))]]
                    product-digits)
-        found? (= 1 (count (set products)))]
+        found?   (= 1 (count (set products)))]
     (when found? n)))
 
 (defn wonderland-number

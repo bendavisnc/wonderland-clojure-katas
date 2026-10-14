@@ -2,15 +2,18 @@
   (:require [clojure.test :refer :all]
             [magic-square.puzzle :refer :all]))
 
-(defn sum-rows [m]
+(defn sum-rows
+  [m]
   (map #(reduce + %) m))
 
-(defn sum-cols [m]
+(defn sum-cols
+  [m]
   [(reduce + (map first m))
    (reduce + (map second m))
    (reduce + (map last m))])
 
-(defn sum-diagonals [m]
+(defn sum-diagonals
+  [m]
   [(+ (get-in m [0 0]) (get-in m [1 1]) (get-in m [2 2]))
    (+ (get-in m [2 0]) (get-in m [1 1]) (get-in m [0 2]))])
 

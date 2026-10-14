@@ -10,10 +10,10 @@
   [prev-steps]
   (let [most-recent (last prev-steps)]
     (or (some (fn [[k v]] (when (:you v) k))
-              {:left-bank (first most-recent) :right-bank (last most-recent)})
+              {:left-bank (first most-recent), :right-bank (last most-recent)})
         (let [second-most-recent (nth prev-steps (- (count prev-steps) 2) nil)]
           (some (fn [[k v]] (when (:you v) k))
-                {:boat-from-left (first second-most-recent)
+                {:boat-from-left  (first second-most-recent),
                  :boat-from-right (last second-most-recent)})))))
 
 (defn everyones-safe?

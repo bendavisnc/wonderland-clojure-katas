@@ -23,9 +23,9 @@
            (filter logic/everyones-safe?)))))
 
 (def every-possible-next-from
-  {:left-bank (every-possible-next-from-* :left-bank :boat)
-   :boat-from-left (every-possible-next-from-* :boat :right-bank)
-   :right-bank (every-possible-next-from-* :right-bank :boat)
+  {:left-bank       (every-possible-next-from-* :left-bank :boat),
+   :boat-from-left  (every-possible-next-from-* :boat :right-bank),
+   :right-bank      (every-possible-next-from-* :right-bank :boat),
    :boat-from-right (every-possible-next-from-* :boat :left-bank)})
 
 (defn every-possible-next-step

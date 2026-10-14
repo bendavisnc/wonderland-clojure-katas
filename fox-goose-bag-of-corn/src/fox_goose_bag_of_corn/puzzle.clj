@@ -6,7 +6,7 @@
 (defn expand-paths
   "Expands the BFS queue by generating new possible paths while avoiding revisited states."
   [queue]
-  (let [steps (first queue)
+  (let [steps      (first queue)
         next-steps (steps/every-possible-next-step steps)]
     (apply conj (pop queue) (map #(conj steps %) next-steps))))
 

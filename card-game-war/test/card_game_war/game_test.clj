@@ -25,8 +25,8 @@
                   (map-indexed vector cards))
           _ (assert (= [26 26]
                        [(count player-one-cards) (count player-two-cards)]))
-          card-hands      {player-one (vec player-one-cards)
-                           player-two (vec player-two-cards)
+          card-hands      {player-one (vec player-one-cards),
+                           player-two (vec player-two-cards),
                            discard    []}
           [card-hands' _] ((play-game (draw-cards)) card-hands)]
       (is (= 0 (count (player-one card-hands'))))
@@ -46,8 +46,8 @@
           player-two-cards  (vec (drop-last cards-b))
           _ (assert (= [27 25]
                        [(count player-one-cards) (count player-two-cards)]))
-          card-hands        {player-one player-one-cards
-                             player-two player-two-cards
+          card-hands        {player-one player-one-cards,
+                             player-two player-two-cards,
                              discard    []}
           [card-hands' _]   ((play-game (draw-cards)) card-hands)]
       (is (= 0 (count (player-one card-hands'))))

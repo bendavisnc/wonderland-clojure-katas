@@ -32,13 +32,13 @@
   [(update maze-step :maze maze-set [0 0] x)])
 
 (defmethod next-maze-steps ::end
-  [{:keys [position] :as maze-step}]
+  [{:keys [position], :as maze-step}]
   [(-> maze-step
        (update :maze maze-set position x)
        (assoc :last-update ::end))])
 
 (defmethod next-maze-steps :default
-  [{:keys [maze position maze-size] :as maze-step}]
+  [{:keys [maze position maze-size], :as maze-step}]
   (flatten (let [directions [[-1 0] [1 0] [0 -1] [0 1]]]
              (for [direction directions
                    :let      [position' (add position direction)]
@@ -53,8 +53,8 @@
 (defn search
   [maze]
   (loop [queue (into PersistentQueue/EMPTY
-                     [[{:position  [0 0]
-                        :maze      maze
+                     [[{:position  [0 0],
+                        :maze      maze,
                         :maze-size [(count (first maze)) (count maze)]}]])]
     (let [maze-steps       (peek queue)
           _ (assert vector? maze-steps)

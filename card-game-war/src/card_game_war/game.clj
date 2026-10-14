@@ -101,8 +101,9 @@
                              (winner player (last winning-cards))
                              (nil? player) tie-result
                              :else (throw (ex-info "Cannot determine winner."
-                                                   {:player player
-                                                    :winning-cards winning-cards
+                                                   {:player player,
+                                                    :winning-cards
+                                                    winning-cards,
                                                     :losing-cards
                                                     losing-cards})))))))))
 
@@ -113,7 +114,7 @@
                :losing-cards  (if losing-card [losing-card] [])
                :tie-result    ::war
                :winner        (fn [player card]
-                                {::battle-winner {:player       player
+                                {::battle-winner {:player       player,
                                                   :winning-card card}})))
 
 (defn play-battle
@@ -139,7 +140,7 @@
                :losing-cards  losing-cards
                :tie-result    ::draw
                :winner        (fn [player cards]
-                                {::war-winner {:player        player
+                                {::war-winner {:player        player,
                                                :winning-cards cards}})))
 
 (defn play-war
@@ -183,12 +184,12 @@
    For testing only."
   [card-a card-b]
   (let [[_ result] ((play-battle (pure [card-a card-b]))
-                    {player-one [] player-two [] discard []})]
+                    {player-one [], player-two [], discard []})]
     (if-let [card (some-> result
                           ::battle-winner
                           :winning-card)]
       card
-      (throw (ex-info "Cards are equal." {:card-a card-a :card-b card-b})))))
+      (throw (ex-info "Cards are equal." {:card-a card-a, :card-b card-b})))))
 
 (defn play-game
   "A game state function that continually invokes `play-battle-with-war-fallback` until game over game state is reached. 
