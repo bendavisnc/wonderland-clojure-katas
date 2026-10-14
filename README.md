@@ -1,4 +1,4 @@
-# wonderland-clojure-katas [![Build Status](https://github.com/bendavisnc/wonderland-clojure-katas/actions/workflows/tests.yml/badge.svg)](https://github.com/bendavisnc/wonderland-clojure-katas/actions/workflows/tests.yml)
+# wonderland-clojure-katas [![Build Status](https://github.com/bendavisnc/wonderland-clojure-katas/actions/workflows/tests.yml/badge.svg)](https://github.com/bendavisnc/wonderland-clojure-katas/actions/workflows/tests.yml) [![Build Status](https://github.com/bendavisnc/wonderland-clojure-katas/actions/workflows/lintchecks.yml/badge.svg)](https://github.com/bendavisnc/wonderland-clojure-katas/actions/workflows/lintchecks.yml)
 
 
 These are a collection of Clojure

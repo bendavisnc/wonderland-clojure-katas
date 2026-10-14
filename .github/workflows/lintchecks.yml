@@ -1,0 +1,92 @@
+name: lintchecks
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+    inputs:
+      project:
+        description: "Which projects should lint check?"
+        required: true
+        type: choice
+        options:
+          - all
+          - alphabet-cipher
+          - card-game-war
+          - doublets
+          - fox-goose-bag-of-corn
+          - magic-square
+          - tiny-maze
+          - wonderland-number
+
+jobs:
+  lintchecks:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-java@v6
+        with:
+          distribution: temurin
+          java-version: "25"
+
+      - name: Install Clojure
+        uses: DeLaGuardo/setup-clojure@13
+        with:
+          zprint: latest
+
+      - uses: dorny/paths-filter@v4
+        id: changes
+        if: github.event_name != 'workflow_dispatch'
+        with:
+          filters: |
+            alphabet-cipher:
+              - 'alphabet-cipher/**'
+            card-game-war:
+              - 'card-game-war/**'
+            doublets:
+              - 'doublets/**'
+            fox-goose-bag-of-corn:
+              - 'fox-goose-bag-of-corn/**'
+            magic-square:
+              - 'magic-square/**'
+            tiny-maze:
+              - 'tiny-maze/**'
+            wonderland-number:
+              - 'wonderland-number/**'
+
+      - name: Lint check alphabet-cipher
+        if: (github.event_name == 'workflow_dispatch' && (inputs.project == 'all' || inputs.project == 'alphabet-cipher')) || (github.event_name != 'workflow_dispatch' && steps.changes.outputs.alphabet-cipher == 'true')
+        working-directory: alphabet-cipher
+        run: ../lintcheck.sh
+
+      - name: Lint check card-game-war
+        if: (github.event_name == 'workflow_dispatch' && (inputs.project == 'all' || inputs.project == 'card-game-war')) || (github.event_name != 'workflow_dispatch' && steps.changes.outputs.card-game-war == 'true')
+        working-directory: card-game-war
+        run: ../lintcheck.sh
+
+      - name: Lint check doublets
+        if: (github.event_name == 'workflow_dispatch' && (inputs.project == 'all' || inputs.project == 'doublets')) || (github.event_name != 'workflow_dispatch' && steps.changes.outputs.doublets == 'true')
+        working-directory: doublets
+        run: ../lintcheck.sh
+
+      - name: Lint check fox-goose-bag-of-corn
+        if: (github.event_name == 'workflow_dispatch' && (inputs.project == 'all' || inputs.project == 'fox-goose-bag-of-corn')) || (github.event_name != 'workflow_dispatch' && steps.changes.outputs.fox-goose-bag-of-corn == 'true')
+        working-directory: fox-goose-bag-of-corn
+        run: ../lintcheck.sh
+
+      - name: Lint check magic-square
+        if: (github.event_name == 'workflow_dispatch' && (inputs.project == 'all' || inputs.project == 'magic-square')) || (github.event_name != 'workflow_dispatch' && steps.changes.outputs.magic-square == 'true')
+        working-directory: magic-square
+        run: ../lintcheck.sh
+
+      - name: Lint check tiny-maze
+        if: (github.event_name == 'workflow_dispatch' && (inputs.project == 'all' || inputs.project == 'tiny-maze')) || (github.event_name != 'workflow_dispatch' && steps.changes.outputs.tiny-maze == 'true')
+        working-directory: tiny-maze
+        run: ../lintcheck.sh
+
+      - name: Lint check wonderland-number
+        if: (github.event_name == 'workflow_dispatch' && (inputs.project == 'all' || inputs.project == 'wonderland-number')) || (github.event_name != 'workflow_dispatch' && steps.changes.outputs.wonderland-number == 'true')
+        working-directory: wonderland-number
+        run: ../lintcheck.sh
