@@ -1,4 +1,5 @@
-# wonderland-clojure-katas
+# wonderland-clojure-katas [![Build Status](https://github.com/bendavisnc/wonderland-clojure-katas/actions/workflows/tests.yml/badge.svg)](https://github.com/bendavisnc/wonderland-clojure-katas/actions/workflows/tests.yml)
+
 
 These are a collection of Clojure
 [katas](http://en.wikipedia.org/wiki/Kata_%28programming%29) inspired by
